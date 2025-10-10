@@ -5,6 +5,19 @@ meta:
     # Padring is used instead of pins
     OpenROAD.IOPlacement: null
     +Odb.SetPowerConnections: OpenROAD.Padring
+    OpenROAD.TapEndcapInsertion: null
+    OpenROAD.RepairDesignPostGpl: null
+    Odb.ManualGlobalPlacement: null
+    OpenROAD.CTS: null
+    OpenROAD.STAMidPnr-1: null
+    OpenROAD.ResizerTimingPostCTS: null
+    OpenROAD.STAMidPnr-2: null
+    OpenROAD.CheckAntennas: null
+    Odb.DiodesOnPorts: null
+    OpenROAD.RepairAntennas: null
+    OpenROAD.STAMidPnr: null
+    OpenROAD.CheckAntennas: null
+    OpenROAD.FillInsertion: null
     
     # Add the seal ring
     +Checker.XOR: KLayout.SealRing
@@ -40,7 +53,6 @@ meta:
 DESIGN_NAME: chip_top
 VERILOG_FILES:
 - dir::../src/chip_top.sv
-- dir::../src/chip_core.sv
 
 # Enable plugin for better SystemVerilog support
 # USE_SLANG: True
@@ -129,26 +141,26 @@ PAD_WEST: [
     dvdd_west_2,
     dvss_west_2,
 
-    "inputs\\[11\\].pad",
-    "inputs\\[10\\].pad",
-    "inputs\\[9\\].pad",
-    "inputs\\[8\\].pad",
-    "inputs\\[7\\].pad",
-    "inputs\\[6\\].pad",
+    "bidir\\[53\\].pad",
+    "bidir\\[52\\].pad",
+    "bidir\\[51\\].pad",
+    "bidir\\[50\\].pad",
+    "bidir\\[49\\].pad",
+    "bidir\\[48\\].pad",
 
     dvdd_west_1,
     dvss_west_1,
 
-    "inputs\\[5\\].pad",
-    "inputs\\[4\\].pad",
-    "inputs\\[3\\].pad",
-    "inputs\\[2\\].pad",
+    "bidir\\[47\\].pad",
+    "bidir\\[46\\].pad",
+    "bidir\\[45\\].pad",
+    "bidir\\[44\\].pad",
 
     dvdd_west_0,
     dvss_west_0,
     
-    "inputs\\[1\\].pad",
-    "inputs\\[0\\].pad"
+    "bidir\\[43\\].pad",
+    "bidir\\[42\\].pad"
 ]
 
 # SDC files
@@ -166,6 +178,7 @@ GND_NETS:
 # due to the unused Y output for output only pads
 IGNORE_DISCONNECTED_MODULES:
 - gf180mcu_fd_io__bi_24t
+- avali_logo
 
 # Clock
 CLOCK_PORT: clk_PAD
@@ -181,15 +194,24 @@ CORE_AREA: [442, 442, 3490, 4680]
 # Increase for more logic
 # on your die
 PL_TARGET_DENSITY_PCT: 35
-GRT_ALLOW_CONGESTION: true
+RT_MAX_LAYER: Metal5
 
 # PDN
+PDN_MULTILAYER: True
 PDN_CORE_RING: True
+PDN_ENABLE_RAILS: False
 # Maximum metal width without slotting: 30um
-PDN_CORE_RING_VWIDTH: 25
-PDN_CORE_RING_HWIDTH: 25
+PDN_CORE_RING_VWIDTH: 5
+PDN_CORE_RING_HWIDTH: 5
+PDN_CORE_RING_VOFFSET: 3
+PDN_CORE_RING_HOFFSET: 3
+PDN_CORE_RING_VSPACING: 2
+PDN_CORE_RING_HSPACING: 2
+PDN_HPITCH: 28
+PDN_VPITCH: 28
 PDN_CORE_RING_CONNECT_TO_PADS: True
-PDN_ENABLE_PINS: False
+PDN_MACRO_CONNECTIONS: ["user_project_example VDD VSS VDD VSS"]
+PDN_ENABLE_PINS: True
 PDN_CORE_VERTICAL_LAYER: Metal2
 PDN_CORE_HORIZONTAL_LAYER: Metal3
 
@@ -210,15 +232,65 @@ MAGIC_GDS_FLATGLOB:
 # Because we have multiple power pads for one power domain
 MAGIC_EXT_UNIQUE: notopports
 
-#MACROS:
-#  gf180mcu_ws_ip__id:
-#    gds:
-#      - dir::../ip/gf180mcu_ws_ip__id/gds/gf180mcu_ws_ip__id.gds
-#    lef:
-#      - dir::../ip/gf180mcu_ws_ip__id/lef/gf180mcu_ws_ip__id.lef
-#    nl:
-#      - dir::../ip/gf180mcu_ws_ip__id/rtl/gf180mcu_ws_ip__id.v
-#    instances:
-#      die_id:
-#        location: [26, 26]
-#        orientation: N
+MACROS:
+  user_project_example:
+    gds:
+      - dir::../example_project/runs/latest/final/gds/user_project_example.gds
+    lef:
+      - dir::../example_project/runs/latest/final/lef/user_project_example.lef
+    pnl:
+      - dir::../example_project/runs/latest/final/pnl/user_project_example.pnl.v
+    nl:
+      - dir::../example_project/runs/latest/final/nl/user_project_example.nl.v
+    spef:
+      min_*: dir::../example_project/runs/latest/final/spef/min/user_project_example.min.spef
+      nom_*: dir::../example_project/runs/latest/final/spef/nom/user_project_example.nom.spef
+      max_*: dir::../example_project/runs/latest/final/spef/max/user_project_example.max.spef
+    lib:
+      max_ff_n40C_5v50: dir::../example_project/runs/latest/final/lib/max_ff_n40C_5v50/user_project_example__max_ff_n40C_5v50.lib
+      max_ss_125C_4v50: dir::../example_project/runs/latest/final/lib/max_ss_125C_4v50/user_project_example__max_ss_125C_4v50.lib
+      max_tt_025C_5v00: dir::../example_project/runs/latest/final/lib/max_tt_025C_5v00/user_project_example__max_tt_025C_5v00.lib
+      min_ff_n40C_5v50: dir::../example_project/runs/latest/final/lib/min_ff_n40C_5v50/user_project_example__min_ff_n40C_5v50.lib
+      min_ss_125C_4v50: dir::../example_project/runs/latest/final/lib/min_ss_125C_4v50/user_project_example__min_ss_125C_4v50.lib
+      min_tt_025C_5v00: dir::../example_project/runs/latest/final/lib/min_tt_025C_5v00/user_project_example__min_tt_025C_5v00.lib
+      nom_ff_n40C_5v50: dir::../example_project/runs/latest/final/lib/nom_ff_n40C_5v50/user_project_example__nom_ff_n40C_5v50.lib
+      nom_ss_125C_4v50: dir::../example_project/runs/latest/final/lib/nom_ss_125C_4v50/user_project_example__nom_ss_125C_4v50.lib
+      nom_tt_025C_5v00: dir::../example_project/runs/latest/final/lib/nom_tt_025C_5v00/user_project_example__nom_tt_025C_5v00.lib
+    instances:
+      user_project_example:
+        location: [1000, 1000]
+        orientation: N
+  gf180mcu_ws_ip__id:
+    gds:
+      - dir::../ip/gf180mcu_ws_ip__id/gds/gf180mcu_ws_ip__id.gds
+    lef:
+      - dir::../ip/gf180mcu_ws_ip__id/lef/gf180mcu_ws_ip__id.lef
+    nl:
+      - dir::../ip/gf180mcu_ws_ip__id/rtl/gf180mcu_ws_ip__id.v
+    instances:
+      die_id:
+        location: [26, 26]
+        orientation: N
+  avali_logo:
+    gds:
+      - dir::../silicon_art/avali_logo.gds
+    lef:
+      - dir::../silicon_art/avali_logo.lef
+    nl:
+      - dir::../silicon_art/avali_logo.v
+    instances:
+      avali_logo:
+        location: [571, 3987]
+        orientation: N
+
+# Make sure netgen doesn't create 'no_connect' nets
+# Not needed since netgen 1.5.303
+LVS_FLATTEN_CELLS:
+- gf180mcu_ws_ip__id
+- avali_logo
+
+# gf180mcu_ws_ip__id has no ports and components
+# therefore make it an abstract cell in the layout
+MAGIC_EXT_ABSTRACT_CELLS:
+- gf180mcu_ws_ip__id
+- avali_logo

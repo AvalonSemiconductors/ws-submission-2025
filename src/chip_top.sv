@@ -4,8 +4,7 @@
 `default_nettype none
 
 module chip_top #(
-    parameter NUM_INPUT = 12,
-    parameter NUM_BIDIR = 42
+    parameter NUM_BIDIR = 54
     )(
     `ifdef USE_POWER_PINS
     inout wire VDD,
@@ -15,16 +14,11 @@ module chip_top #(
     inout  wire       clk_PAD,
     inout  wire       rst_n_PAD,
     
-    inout  wire [NUM_INPUT-1:0] input_PAD,
     inout  wire [NUM_BIDIR-1:0] bidir_PAD
 );
 
     wire clk_PAD2CORE;
     wire rst_n_PAD2CORE;
-    
-    wire [NUM_INPUT-1:0] input_PAD2CORE;
-    wire [NUM_INPUT-1:0] input_CORE2PAD_PU;
-    wire [NUM_INPUT-1:0] input_CORE2PAD_PD;
 
     wire [NUM_BIDIR-1:0] bidir_PAD2CORE;
     wire [NUM_BIDIR-1:0] bidir_CORE2PAD;
@@ -34,6 +28,8 @@ module chip_top #(
     wire [NUM_BIDIR-1:0] bidir_CORE2PAD_IE;
     wire [NUM_BIDIR-1:0] bidir_CORE2PAD_PU;
     wire [NUM_BIDIR-1:0] bidir_CORE2PAD_PD;
+    
+    wire [3:0] const_zero;
 
     // Power / ground IO pad instances
 
@@ -217,8 +213,8 @@ module chip_top #(
         .Y      (clk_PAD2CORE),
         .PAD    (clk_PAD),
         
-        .PU     (1'b0),
-        .PD     (1'b0)
+        .PU     (const_zero[0]),
+        .PD     (const_zero[1])
     );
     
     // Normal input
@@ -233,28 +229,9 @@ module chip_top #(
         .Y      (rst_n_PAD2CORE),
         .PAD    (rst_n_PAD),
         
-        .PU     (1'b0),
-        .PD     (1'b0)
+        .PU     (const_zero[2]),
+        .PD     (const_zero[3])
     );
-
-    generate
-    for (genvar i=0; i<NUM_INPUT; i++) begin : inputs
-        gf180mcu_fd_io__in_c pad (
-            `ifdef USE_POWER_PINS
-            .DVDD   (VDD),
-            .DVSS   (VSS),
-            .VDD    (VDD),
-            .VSS    (VSS),
-            `endif
-        
-            .Y      (input_PAD2CORE[i]),
-            .PAD    (input_PAD[i]),
-            
-            .PU     (input_CORE2PAD_PU[i]),
-            .PD     (input_CORE2PAD_PD[i])
-        );
-    end
-    endgenerate
 
     generate
     for (genvar i=0; i<NUM_BIDIR; i++) begin : bidir
@@ -280,33 +257,32 @@ module chip_top #(
         );
     end
     endgenerate
-
-    // Core design
-
-    (* keep *) chip_core #(
-        .NUM_INPUT  (NUM_INPUT),
-        .NUM_BIDIR  (NUM_BIDIR)
-    ) i_chip_core (
-        .clk        (clk_PAD2CORE),
-        .rst_n      (rst_n_PAD2CORE),
     
-        .input_in   (input_PAD2CORE),
-        .input_pu   (input_CORE2PAD_PU),
-        .input_pd   (input_CORE2PAD_PD),
-
-        .bidir_in   (bidir_PAD2CORE),
-        .bidir_out  (bidir_CORE2PAD),
-        .bidir_oe   (bidir_CORE2PAD_OE),
-        .bidir_cs   (bidir_CORE2PAD_CS),
-        .bidir_sl   (bidir_CORE2PAD_SL),
-        .bidir_ie   (bidir_CORE2PAD_IE),
-        .bidir_pu   (bidir_CORE2PAD_PU),
-        .bidir_pd   (bidir_CORE2PAD_PD)
+    user_project_example user_project_example(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .clk_i(clk_PAD2CORE),
+        .rst_n(rst_n_PAD2CORE),
+        .io_out(bidir_CORE2PAD),
+        .io_in(bidir_PAD2CORE),
+        .io_oe(bidir_CORE2PAD_OE),
+        .io_cs(bidir_CORE2PAD_CS),
+        .io_sl(bidir_CORE2PAD_SL),
+        .io_pu(bidir_CORE2PAD_PU),
+        .io_pd(bidir_CORE2PAD_PD),
+        .io_ie(bidir_CORE2PAD_IE),
+        .const_one(),
+        .const_zero(const_zero)
     );
     
-    /*// Die ID - do not remove, necessary for tapeout
+    // Die ID - do not remove, necessary for tapeout
     (* keep *)
-    gf180mcu_ws_ip__id die_id ();*/
+    gf180mcu_ws_ip__id die_id ();
+    
+    (* keep *)
+    avali_logo avali_logo ();
 
 endmodule
 
