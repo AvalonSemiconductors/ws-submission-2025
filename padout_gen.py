@@ -7,6 +7,7 @@ power_pad_color = (255, 50, 50)
 ground_pad_color = (25, 25, 25)
 digital_pad_color = (100, 255, 100)
 analog_pad_color = (100, 100, 255)
+clk_pad_color = (143, 0, 255)
 text_margin = 45
 
 core_width = 4000
@@ -61,6 +62,8 @@ def draw_pads(pads, offset, direction, side, reverse = False):
 			color = power_pad_color
 		if('vss' in pad):
 			color = ground_pad_color
+		if('clk' in pad):
+			color = clk_pad_color
 		xpos = offset
 		ypos = position
 		if(direction):
