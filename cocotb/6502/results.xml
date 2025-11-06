@@ -1,0 +1,8 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1762204063" />
+    <testcase name="test_6502" classname="test" file="/run/media/tholin/8a6b8802-051e-45a8-8492-771202e4c08a/AAAAA/gf180mcu-project-template/cocotb/6502/test.py" lineno="6" time="13809.378541707993" sim_time_ns="1791905300.0" ratio_time="129760.02465193998">
+      <failure error_type="SimFailure" error_msg="Simulator shut down prematurely" />
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,6 @@
+<testsuites name="results">
+  <testsuite name="all" package="all">
+    <property name="random_seed" value="1762165158" />
+    <testcase name="test_c64pla" classname="test" file="/media/lucah/8a6b8802-051e-45a8-8492-771202e4c08a/AAAAA/gf180mcu-project-template/cocotb/C64PLA/test.py" lineno="5" time="120.66280817985535" sim_time_ns="6553900.0" ratio_time="54315.82522288897" />
+  </testsuite>
+</testsuites>

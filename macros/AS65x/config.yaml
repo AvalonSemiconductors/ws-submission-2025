@@ -1,0 +1,36 @@
+meta:
+  version: 2
+  flow: Classic
+  substituting_steps:
+    KLayout.DRC: null
+    Checker.KLayoutDRC: null
+
+# DO CHANGE
+DESIGN_NAME: as65x
+VERILOG_FILES: ["dir::src/cpu.v", "dir::src/wrapped_cpu.v", "dir::src/multiplier.v"]
+CLOCK_PERIOD: 30
+DIE_AREA: [0, 0, 450, 450]
+RUN_MAGIC_DRC: true
+# Valid values are AREA 0-3 and DELAY 0-4
+# DELAY 4 = fastest, but largest area
+# AREA 3 = slowest, but smallest area
+SYNTH_STRATEGY: DELAY 4
+PL_RESIZER_SETUP_SLACK_MARGIN: 0.15
+GRT_RESIZER_SETUP_SLACK_MARGIN: 0.15
+GRT_RESIZER_HOLD_SLACK_MARGIN: 0.15
+PL_RESIZER_HOLD_SLACK_MARGIN: 0.15
+PL_RESIZER_HOLD_MAX_BUFFER_PCT: 100
+
+RUN_CTS: true
+MAX_FANOUT_CONSTRAINT: 5
+CLOCK_PORT: clk_i
+CLOCK_NET: clk_i
+PNR_SDC_FILE: dir::base.sdc
+SIGNOFF_SDC_FILE: dir::base.sdc
+VDD_NETS: ["VDD"]
+GND_NETS: ["VSS"]
+VERILOG_POWER_DEFINE: "USE_POWER_PINS"
+RT_MAX_LAYER: Metal4
+FP_PIN_ORDER_CFG: dir::pin_order.cfg
+FP_PDN_MULTILAYER: false
+FP_SIZING: absolute

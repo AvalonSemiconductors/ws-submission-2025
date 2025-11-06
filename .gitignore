@@ -1,8 +1,12 @@
 runs/
 __pycache__/
-gf180mcu/
+gf180mcu_pdk/
 gf180_drc.lyrdb
 sim_build/
 final/
 librelane_install/
 */runs/
+cocotb/C64PLA/neatPLA/
+cocotb/*/sim_build/
+macros/AS65x/*/obj_dir/
+cocotb/6502/6502_65C02_functional_tests/

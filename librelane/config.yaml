@@ -1,10 +1,12 @@
+#python3 make_gds.py --cellname avali_logo --boundary "0/0" "81/5" --foreground "81/0" --pixel-size 0.9 ../../../silicon_art/Logo_BW.png ../../../silicon_art/avali_logo.gds
 meta:
-  version: 2
-  flow: Classic
+  version: 3
+  flow: Chip
   substituting_steps:
-    # Padring is used instead of pins
-    OpenROAD.IOPlacement: null
-    +Odb.SetPowerConnections: OpenROAD.Padring
+    # Disable KLayout antenna check
+    KLayout.Antenna: null
+    Checker.KLayoutAntenna: null
+    
     OpenROAD.TapEndcapInsertion: null
     OpenROAD.RepairDesignPostGpl: null
     Odb.ManualGlobalPlacement: null
@@ -18,37 +20,6 @@ meta:
     OpenROAD.STAMidPnr: null
     OpenROAD.CheckAntennas: null
     OpenROAD.FillInsertion: null
-    
-    # Add the seal ring
-    +Checker.XOR: KLayout.SealRing
-    
-    # Run filler insertion
-    +KLayout.SealRing: KLayout.FillerGeneration
-    
-    # Check the density across the layers
-    +KLayout.FillerGeneration: KLayout.RunDensity
-    +KLayout.RunDensity: Checker.Density
-    
-    # Due to OpenROAD bug
-    # https://github.com/The-OpenROAD-Project/OpenROAD/issues/8229
-    #TODO OpenROAD.Repair*: null
-    
-    # Not supported for gf180mcu
-    KLayout.DRC: null
-    Checker.KLayoutDRC: null
-    
-    # Save time
-    #OpenROAD.IRDropReport: null
-    #Magic.DRC: null
-    #Checker.MagicDRC: null
-    #KLayout.XOR: null
-    
-    # Stuck, need to investigate...
-    #Netgen.LVS: null
-    #Checker.LVS: null
-    
-    Magic.WriteLEF: null # Not needed, save time
-    Odb.CheckDesignAntennaProperties: null # Requires LEF
 
 DESIGN_NAME: chip_top
 VERILOG_FILES:
@@ -61,106 +32,90 @@ VERILOG_FILES:
 PRIMARY_GDSII_STREAMOUT_TOOL: klayout
 
 # Specify the pad instances for the padring
-PAD_SOUTH: [
-    clk_pad,
-    rst_n_pad,
-
-    "bidir\\[0\\].pad",
-    "bidir\\[1\\].pad",
-    "bidir\\[2\\].pad",
-    "bidir\\[3\\].pad",
-    "bidir\\[4\\].pad",
-    "bidir\\[5\\].pad",
-
-    dvss_south_0,
-
-    "bidir\\[6\\].pad",
-    "bidir\\[7\\].pad",
-    "bidir\\[8\\].pad",
-    "bidir\\[9\\].pad",
-    "bidir\\[10\\].pad",
+PAD_NORTH: [
+    "bidir\\[12\\].pad", # Bottom-left
     "bidir\\[11\\].pad",
-    "bidir\\[12\\].pad",
-    "bidir\\[13\\].pad"
+    "bidir\\[10\\].pad",
+    "bidir\\[9\\].pad",
+    "bidir\\[8\\].pad",
+    "design_sel\\[3\\].pad",
+    "bidir\\[7\\].pad",
+    dvdd_south_0,
+    "bidir\\[6\\].pad",
+    "bidir\\[5\\].pad",
+    clk_pad,
+    "bidir\\[4\\].pad",
+    "bidir\\[3\\].pad",
+    "bidir\\[2\\].pad",
+    "bidir\\[1\\].pad",
+    "bidir\\[0\\].pad",
+    "analog_5" # Bottom-right
 ]
 
-PAD_EAST: [
-    dvdd_east_0,
-    dvss_east_0,
-
-    "bidir\\[14\\].pad",
-    "bidir\\[15\\].pad",
-    "bidir\\[16\\].pad",
-    "bidir\\[17\\].pad",
-    "bidir\\[18\\].pad",
-    "bidir\\[19\\].pad",
-    
-    dvdd_east_1,
-    dvss_east_1,
-
-    
+PAD_WEST: [
+    "bidir\\[21\\].pad", # Bottom-right
+    dvss_east_2,
+    "analog_11",
     "bidir\\[20\\].pad",
-    "bidir\\[21\\].pad",
+    "analog_2",
+    "bidir\\[19\\].pad",
+    "analog_10",
+    "bidir\\[18\\].pad",
+    "bidir\\[17\\].pad",
+    "design_sel\\[0\\].pad",
+    dvss_east_1,
+    "bidir\\[16\\].pad",
+    "bidir\\[15\\].pad",
+    "design_sel\\[2\\].pad",
+    "design_sel\\[1\\].pad",
+    dvdd_east_1,
+    "bidir\\[14\\].pad",
+    "bidir\\[13\\].pad",
+    dvss_east_0,
+    dvdd_east_0 # Top-right
+]
+
+PAD_SOUTH: [
+    "analog_3", # Top-left
+    "design_sel\\[4\\].pad",
     "bidir\\[22\\].pad",
     "bidir\\[23\\].pad",
     "bidir\\[24\\].pad",
     "bidir\\[25\\].pad",
-    
-    dvss_east_2,
-    dvdd_east_2,
-    dvss_east_3,
-    dvdd_east_3
-]
-
-PAD_NORTH: [
-    "bidir\\[41\\].pad",
-    "bidir\\[40\\].pad",
-    "bidir\\[39\\].pad",
-    "bidir\\[38\\].pad",
-    "bidir\\[37\\].pad",
-    "bidir\\[36\\].pad",
-    "bidir\\[35\\].pad",
-    "bidir\\[34\\].pad",
-
+    "analog_4",
+    dvdd_north_0,
+    "analog_6",
+    "bidir\\[26\\].pad",
     dvss_north_0,
-
-    "bidir\\[33\\].pad",
-    "bidir\\[32\\].pad",
-    "bidir\\[31\\].pad",
-    "bidir\\[30\\].pad",
-    "bidir\\[29\\].pad",
-    "bidir\\[28\\].pad",
     "bidir\\[27\\].pad",
-    "bidir\\[26\\].pad"
+    "bidir\\[28\\].pad",
+    "bidir\\[29\\].pad",
+    "bidir\\[30\\].pad",
+    "bidir\\[31\\].pad",
+    "bidir\\[32\\].pad" # Top-right
 ]
 
-
-PAD_WEST: [
-    dvdd_west_3,
-    dvss_west_3,
-    dvdd_west_2,
-    dvss_west_2,
-
-    "bidir\\[53\\].pad",
-    "bidir\\[52\\].pad",
-    "bidir\\[51\\].pad",
-    "bidir\\[50\\].pad",
-    "bidir\\[49\\].pad",
-    "bidir\\[48\\].pad",
-
-    dvdd_west_1,
-    dvss_west_1,
-
-    "bidir\\[47\\].pad",
-    "bidir\\[46\\].pad",
-    "bidir\\[45\\].pad",
-    "bidir\\[44\\].pad",
-
-    dvdd_west_0,
+PAD_EAST: [
+    "bidir\\[33\\].pad", # Bottom-Left
+    "bidir\\[34\\].pad",
     dvss_west_0,
-    
-    "bidir\\[43\\].pad",
-    "bidir\\[42\\].pad"
+    dvdd_west_0,
+    "bidir\\[35\\].pad",
+    "bidir\\[36\\].pad",
+    "analog_0",
+    "analog_9",
+    dvss_west_1,
+    dvdd_west_1,
+    "analog_8",
+    "bidir\\[37\\].pad",
+    "bidir\\[38\\].pad",
+    "bidir\\[39\\].pad",
+    "analog_1",
+    "bidir\\[40\\].pad",
+    dvss_west_2,
+    dvdd_west_2,
+    "bidir\\[41\\].pad",
+    "analog_7" # Top-Left
 ]
 
 # SDC files
@@ -178,12 +133,15 @@ GND_NETS:
 # due to the unused Y output for output only pads
 IGNORE_DISCONNECTED_MODULES:
 - gf180mcu_fd_io__bi_24t
+- gf180mcu_fd_io__asig_5p0
 - avali_logo
+- chip_id
+- wafer_space_logo
 
 # Clock
 CLOCK_PORT: clk_PAD
 CLOCK_NET: clk_pad/Y
-CLOCK_PERIOD: 20
+CLOCK_PERIOD: 100
 
 # Floorplanning
 FP_SIZING: absolute
@@ -198,23 +156,15 @@ PL_TARGET_DENSITY_PCT: 35
 RT_MAX_LAYER: Metal5
 
 # PDN
-PDN_MULTILAYER: True
 PDN_CORE_RING: True
-PDN_ENABLE_RAILS: False
 # Maximum metal width without slotting: 30um
-PDN_CORE_RING_VWIDTH: 5
-PDN_CORE_RING_HWIDTH: 5
-PDN_CORE_RING_VOFFSET: 3
-PDN_CORE_RING_HOFFSET: 3
-PDN_CORE_RING_VSPACING: 2
-PDN_CORE_RING_HSPACING: 2
-PDN_HPITCH: 28
-PDN_VPITCH: 28
+PDN_CORE_RING_VWIDTH: 25
+PDN_CORE_RING_HWIDTH: 25
 PDN_CORE_RING_CONNECT_TO_PADS: True
-PDN_MACRO_CONNECTIONS: ["user_project_example VDD VSS VDD VSS"]
-PDN_ENABLE_PINS: True
+PDN_ENABLE_PINS: False
 PDN_CORE_VERTICAL_LAYER: Metal2
 PDN_CORE_HORIZONTAL_LAYER: Metal3
+PDN_MACRO_CONNECTIONS: ["multiplexer VDD VSS VDD VSS", "as65x VDD VSS VDD VSS", "c64pla VDD VSS VDD VSS", "sid VDD VSS VDD VSS"]
 
 # Due to OpenROAD bug
 # https://github.com/The-OpenROAD-Project/OpenROAD/issues/8229
@@ -234,64 +184,164 @@ MAGIC_GDS_FLATGLOB:
 MAGIC_EXT_UNIQUE: notopports
 
 MACROS:
-  user_project_example:
+  multiplexer:
     gds:
-      - dir::../example_project/runs/latest/final/gds/user_project_example.gds
+      - dir::../macros/Multiplexer/runs/latest/final/gds/multiplexer.gds
     lef:
-      - dir::../example_project/runs/latest/final/lef/user_project_example.lef
+      - dir::../macros/Multiplexer/runs/latest/final/lef/multiplexer.lef
     pnl:
-      - dir::../example_project/runs/latest/final/pnl/user_project_example.pnl.v
+      - dir::../macros/Multiplexer/runs/latest/final/pnl/multiplexer.pnl.v
     nl:
-      - dir::../example_project/runs/latest/final/nl/user_project_example.nl.v
+      - dir::../macros/Multiplexer/runs/latest/final/nl/multiplexer.nl.v
     spef:
-      min_*: dir::../example_project/runs/latest/final/spef/min/user_project_example.min.spef
-      nom_*: dir::../example_project/runs/latest/final/spef/nom/user_project_example.nom.spef
-      max_*: dir::../example_project/runs/latest/final/spef/max/user_project_example.max.spef
+      min_*: dir::../macros/Multiplexer/runs/latest/final/spef/min/multiplexer.min.spef
+      nom_*: dir::../macros/Multiplexer/runs/latest/final/spef/nom/multiplexer.nom.spef
+      max_*: dir::../macros/Multiplexer/runs/latest/final/spef/max/multiplexer.max.spef
     lib:
-      max_ff_n40C_5v50: dir::../example_project/runs/latest/final/lib/max_ff_n40C_5v50/user_project_example__max_ff_n40C_5v50.lib
-      max_ss_125C_4v50: dir::../example_project/runs/latest/final/lib/max_ss_125C_4v50/user_project_example__max_ss_125C_4v50.lib
-      max_tt_025C_5v00: dir::../example_project/runs/latest/final/lib/max_tt_025C_5v00/user_project_example__max_tt_025C_5v00.lib
-      min_ff_n40C_5v50: dir::../example_project/runs/latest/final/lib/min_ff_n40C_5v50/user_project_example__min_ff_n40C_5v50.lib
-      min_ss_125C_4v50: dir::../example_project/runs/latest/final/lib/min_ss_125C_4v50/user_project_example__min_ss_125C_4v50.lib
-      min_tt_025C_5v00: dir::../example_project/runs/latest/final/lib/min_tt_025C_5v00/user_project_example__min_tt_025C_5v00.lib
-      nom_ff_n40C_5v50: dir::../example_project/runs/latest/final/lib/nom_ff_n40C_5v50/user_project_example__nom_ff_n40C_5v50.lib
-      nom_ss_125C_4v50: dir::../example_project/runs/latest/final/lib/nom_ss_125C_4v50/user_project_example__nom_ss_125C_4v50.lib
-      nom_tt_025C_5v00: dir::../example_project/runs/latest/final/lib/nom_tt_025C_5v00/user_project_example__nom_tt_025C_5v00.lib
+      max_ff_n40C_5v50: dir::../macros/Multiplexer/runs/latest/final/lib/max_ff_n40C_5v50/multiplexer__max_ff_n40C_5v50.lib
+      max_ss_125C_4v50: dir::../macros/Multiplexer/runs/latest/final/lib/max_ss_125C_4v50/multiplexer__max_ss_125C_4v50.lib
+      max_tt_025C_5v00: dir::../macros/Multiplexer/runs/latest/final/lib/max_tt_025C_5v00/multiplexer__max_tt_025C_5v00.lib
+      min_ff_n40C_5v50: dir::../macros/Multiplexer/runs/latest/final/lib/min_ff_n40C_5v50/multiplexer__min_ff_n40C_5v50.lib
+      min_ss_125C_4v50: dir::../macros/Multiplexer/runs/latest/final/lib/min_ss_125C_4v50/multiplexer__min_ss_125C_4v50.lib
+      min_tt_025C_5v00: dir::../macros/Multiplexer/runs/latest/final/lib/min_tt_025C_5v00/multiplexer__min_tt_025C_5v00.lib
+      nom_ff_n40C_5v50: dir::../macros/Multiplexer/runs/latest/final/lib/nom_ff_n40C_5v50/multiplexer__nom_ff_n40C_5v50.lib
+      nom_ss_125C_4v50: dir::../macros/Multiplexer/runs/latest/final/lib/nom_ss_125C_4v50/multiplexer__nom_ss_125C_4v50.lib
+      nom_tt_025C_5v00: dir::../macros/Multiplexer/runs/latest/final/lib/nom_tt_025C_5v00/multiplexer__nom_tt_025C_5v00.lib
     instances:
-      user_project_example:
-        location: [1000, 1000]
+      multiplexer:
+        location: [1800, 3000]
+        orientation: N
+  as65x:
+    gds:
+      - dir::../macros/AS65x/runs/latest/final/gds/as65x.gds
+    lef:
+      - dir::../macros/AS65x/runs/latest/final/lef/as65x.lef
+    pnl:
+      - dir::../macros/AS65x/runs/latest/final/pnl/as65x.pnl.v
+    nl:
+      - dir::../macros/AS65x/runs/latest/final/nl/as65x.nl.v
+    spef:
+      min_*: dir::../macros/AS65x/runs/latest/final/spef/min/as65x.min.spef
+      nom_*: dir::../macros/AS65x/runs/latest/final/spef/nom/as65x.nom.spef
+      max_*: dir::../macros/AS65x/runs/latest/final/spef/max/as65x.max.spef
+    lib:
+      max_ff_n40C_5v50: dir::../macros/AS65x/runs/latest/final/lib/max_ff_n40C_5v50/as65x__max_ff_n40C_5v50.lib
+      max_ss_125C_4v50: dir::../macros/AS65x/runs/latest/final/lib/max_ss_125C_4v50/as65x__max_ss_125C_4v50.lib
+      max_tt_025C_5v00: dir::../macros/AS65x/runs/latest/final/lib/max_tt_025C_5v00/as65x__max_tt_025C_5v00.lib
+      min_ff_n40C_5v50: dir::../macros/AS65x/runs/latest/final/lib/min_ff_n40C_5v50/as65x__min_ff_n40C_5v50.lib
+      min_ss_125C_4v50: dir::../macros/AS65x/runs/latest/final/lib/min_ss_125C_4v50/as65x__min_ss_125C_4v50.lib
+      min_tt_025C_5v00: dir::../macros/AS65x/runs/latest/final/lib/min_tt_025C_5v00/as65x__min_tt_025C_5v00.lib
+      nom_ff_n40C_5v50: dir::../macros/AS65x/runs/latest/final/lib/nom_ff_n40C_5v50/as65x__nom_ff_n40C_5v50.lib
+      nom_ss_125C_4v50: dir::../macros/AS65x/runs/latest/final/lib/nom_ss_125C_4v50/as65x__nom_ss_125C_4v50.lib
+      nom_tt_025C_5v00: dir::../macros/AS65x/runs/latest/final/lib/nom_tt_025C_5v00/as65x__nom_tt_025C_5v00.lib
+    instances:
+      as65x:
+        location: [1000, 1200]
+        orientation: N
+  c64pla:
+    gds:
+      - dir::../macros/C64PLA/runs/latest/final/gds/c64pla.gds
+    lef:
+      - dir::../macros/C64PLA/runs/latest/final/lef/c64pla.lef
+    pnl:
+      - dir::../macros/C64PLA/runs/latest/final/pnl/c64pla.pnl.v
+    nl:
+      - dir::../macros/C64PLA/runs/latest/final/nl/c64pla.nl.v
+    spef:
+      min_*: dir::../macros/C64PLA/runs/latest/final/spef/min/c64pla.min.spef
+      nom_*: dir::../macros/C64PLA/runs/latest/final/spef/nom/c64pla.nom.spef
+      max_*: dir::../macros/C64PLA/runs/latest/final/spef/max/c64pla.max.spef
+    lib:
+      max_ff_n40C_5v50: dir::../macros/C64PLA/runs/latest/final/lib/max_ff_n40C_5v50/c64pla__max_ff_n40C_5v50.lib
+      max_ss_125C_4v50: dir::../macros/C64PLA/runs/latest/final/lib/max_ss_125C_4v50/c64pla__max_ss_125C_4v50.lib
+      max_tt_025C_5v00: dir::../macros/C64PLA/runs/latest/final/lib/max_tt_025C_5v00/c64pla__max_tt_025C_5v00.lib
+      min_ff_n40C_5v50: dir::../macros/C64PLA/runs/latest/final/lib/min_ff_n40C_5v50/c64pla__min_ff_n40C_5v50.lib
+      min_ss_125C_4v50: dir::../macros/C64PLA/runs/latest/final/lib/min_ss_125C_4v50/c64pla__min_ss_125C_4v50.lib
+      min_tt_025C_5v00: dir::../macros/C64PLA/runs/latest/final/lib/min_tt_025C_5v00/c64pla__min_tt_025C_5v00.lib
+      nom_ff_n40C_5v50: dir::../macros/C64PLA/runs/latest/final/lib/nom_ff_n40C_5v50/c64pla__nom_ff_n40C_5v50.lib
+      nom_ss_125C_4v50: dir::../macros/C64PLA/runs/latest/final/lib/nom_ss_125C_4v50/c64pla__nom_ss_125C_4v50.lib
+      nom_tt_025C_5v00: dir::../macros/C64PLA/runs/latest/final/lib/nom_tt_025C_5v00/c64pla__nom_tt_025C_5v00.lib
+    instances:
+      c64pla:
+        location: [1000, 1600]
+        orientation: N
+  sid:
+    gds:
+      - dir::../macros/SID/runs/latest/final/gds/sid.gds
+    lef:
+      - dir::../macros/SID/runs/latest/final/lef/sid.lef
+    pnl:
+      - dir::../macros/SID/runs/latest/final/pnl/sid.pnl.v
+    nl:
+      - dir::../macros/SID/runs/latest/final/nl/sid.nl.v
+    spef:
+      min_*: dir::../macros/SID/runs/latest/final/spef/min/sid.min.spef
+      nom_*: dir::../macros/SID/runs/latest/final/spef/nom/sid.nom.spef
+      max_*: dir::../macros/SID/runs/latest/final/spef/max/sid.max.spef
+    lib:
+      max_ff_n40C_5v50: dir::../macros/SID/runs/latest/final/lib/max_ff_n40C_5v50/sid__max_ff_n40C_5v50.lib
+      max_ss_125C_4v50: dir::../macros/SID/runs/latest/final/lib/max_ss_125C_4v50/sid__max_ss_125C_4v50.lib
+      max_tt_025C_5v00: dir::../macros/SID/runs/latest/final/lib/max_tt_025C_5v00/sid__max_tt_025C_5v00.lib
+      min_ff_n40C_5v50: dir::../macros/SID/runs/latest/final/lib/min_ff_n40C_5v50/sid__min_ff_n40C_5v50.lib
+      min_ss_125C_4v50: dir::../macros/SID/runs/latest/final/lib/min_ss_125C_4v50/sid__min_ss_125C_4v50.lib
+      min_tt_025C_5v00: dir::../macros/SID/runs/latest/final/lib/min_tt_025C_5v00/sid__min_tt_025C_5v00.lib
+      nom_ff_n40C_5v50: dir::../macros/SID/runs/latest/final/lib/nom_ff_n40C_5v50/sid__nom_ff_n40C_5v50.lib
+      nom_ss_125C_4v50: dir::../macros/SID/runs/latest/final/lib/nom_ss_125C_4v50/sid__nom_ss_125C_4v50.lib
+      nom_tt_025C_5v00: dir::../macros/SID/runs/latest/final/lib/nom_tt_025C_5v00/sid__nom_tt_025C_5v00.lib
+    instances:
+      sid:
+        location: [1500, 800]
         orientation: N
   gf180mcu_ws_ip__id:
     gds:
       - dir::../ip/gf180mcu_ws_ip__id/gds/gf180mcu_ws_ip__id.gds
     lef:
       - dir::../ip/gf180mcu_ws_ip__id/lef/gf180mcu_ws_ip__id.lef
-    nl:
-      - dir::../ip/gf180mcu_ws_ip__id/rtl/gf180mcu_ws_ip__id.v
+    vh:
+      - dir::../ip/gf180mcu_ws_ip__id/vh/gf180mcu_ws_ip__id.v
+    lib:
+      "*":
+        - dir::../ip/gf180mcu_ws_ip__id/lib/gf180mcu_ws_ip__id.lib
     instances:
-      die_id:
+      chip_id:
         location: [26, 26]
+        orientation: N
+  gf180mcu_ws_ip__logo:
+    gds:
+      - dir::../ip/gf180mcu_ws_ip__logo/gds/gf180mcu_ws_ip__logo.gds
+    lef:
+      - dir::../ip/gf180mcu_ws_ip__logo/lef/gf180mcu_ws_ip__logo.lef
+    vh:
+      - dir::../ip/gf180mcu_ws_ip__logo/vh/gf180mcu_ws_ip__logo.v
+    lib:
+      "*":
+        - dir::../ip/gf180mcu_ws_ip__logo/lib/gf180mcu_ws_ip__logo.lib
+    instances:
+      wafer_space_logo:
+        location: [3762.75, 4952.75]
         orientation: N
   avali_logo:
     gds:
       - dir::../silicon_art/avali_logo.gds
     lef:
       - dir::../silicon_art/avali_logo.lef
-    nl:
+    vh:
       - dir::../silicon_art/avali_logo.v
     instances:
       avali_logo:
-        location: [571, 3987]
+        location: [1000, 3900]
         orientation: N
 
 # Make sure netgen doesn't create 'no_connect' nets
 # Not needed since netgen 1.5.303
 LVS_FLATTEN_CELLS:
 - gf180mcu_ws_ip__id
+- gf180mcu_ws_ip__logo
 - avali_logo
 
 # gf180mcu_ws_ip__id has no ports and components
 # therefore make it an abstract cell in the layout
 MAGIC_EXT_ABSTRACT_CELLS:
 - gf180mcu_ws_ip__id
+- gf180mcu_ws_ip__logo
 - avali_logo

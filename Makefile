@@ -3,7 +3,7 @@ MAKEFILE_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 RUN_TAG = $(shell ls librelane/runs/ | tail -n 1)
 TOP = chip_top
 
-PDK_ROOT ?= $(MAKEFILE_DIR)/gf180mcu
+PDK_ROOT ?= $(MAKEFILE_DIR)/gf180mcu_pdk
 PDK ?= gf180mcuD
 
 .DEFAULT_GOAL := help
@@ -19,8 +19,8 @@ all: librelane ## Build the project (runs librelane)
 .PHONY: all
 
 clone-pdk: ## Clone the GF180MCU PDK repository
-	rm -rf $(MAKEFILE_DIR)/gf180mcu
-	git clone https://github.com/wafer-space/gf180mcu.git $(MAKEFILE_DIR)/gf180mcu --depth 1
+	rm -rf $(MAKEFILE_DIR)/gf180mcu_pdk
+	git clone https://github.com/wafer-space/gf180mcu.git $(MAKEFILE_DIR)/gf180mcu_pdk --depth 1
 .PHONY: clone-pdk
 
 librelane: ## Run librelane flow (synthesis, PnR, verification)

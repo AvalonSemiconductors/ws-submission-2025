@@ -1,0 +1,27 @@
+meta:
+  version: 2
+  flow: Classic
+  substituting_steps:
+    KLayout.DRC: null
+    Checker.KLayoutDRC: null
+
+# DO CHANGE
+DESIGN_NAME: c64pla
+VERILOG_FILES: ["dir::src/pla.v", "dir::src/wrapped_pla.v"]
+CLOCK_PERIOD: 100
+DIE_AREA: [0, 0, 90, 150]
+RUN_MAGIC_DRC: true
+RSZ_DONT_TOUCH_RX: ".*_dyl.*"
+
+RUN_CTS: true
+MAX_FANOUT_CONSTRAINT: 4
+MAX_TRANSITION_CONSTRAINT: 1.5
+CLOCK_PORT: clk_i
+CLOCK_NET: clk_i
+VDD_NETS: ["VDD"]
+GND_NETS: ["VSS"]
+VERILOG_POWER_DEFINE: "USE_POWER_PINS"
+RT_MAX_LAYER: Metal4
+FP_PIN_ORDER_CFG: dir::pin_order.cfg
+FP_PDN_MULTILAYER: false
+FP_SIZING: absolute
