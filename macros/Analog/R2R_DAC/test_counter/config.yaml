@@ -1,0 +1,10 @@
+meta:
+  version: 3
+  flow: Classic
+
+DESIGN_NAME: test_counter
+VERILOG_FILES: "dir::test_counter.v"
+CLOCK_PERIOD: 20
+VDD_NETS: ["VDD"]
+GND_NETS: ["VSS"]
+VERILOG_POWER_DEFINE: "USE_POWER_PINS"

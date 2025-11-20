@@ -277,8 +277,8 @@ wire [41:0] oe_6510 = {
 	1'b0,
 	1'b0,
 	1'b0,
-	1'b0,
 	1'b0, //RESn
+	1'b0,
 	1'b1, //PH1OUT
 	RWn_oe,
 	D_oe,
@@ -289,23 +289,6 @@ assign io_out = select_6502 ? io_out_6502 : io_out_6510;
 assign io_oe = select_6502 ? oe_6502 : oe_6510;
 
 wire rst_n = rst_override_n && (select_6502 ? io_in[7] : io_in[4]);
-
-always @(negedge clk_i) begin
-	if(!rst_n) begin
-		//If 6510 is selected and pad 6 is NOT bonded to ground,
-		//pre-load DDR and PORT with correct values for a C64
-		if(!select_6502 && io_in[6]) begin
-			DDR <= 8'b00101111;
-			PORT <= 8'b00100111;
-		end else begin
-			DDR <= 8'h00;
-			PORT <= 8'h00;
-		end
-	end else begin
-		if(A_o == 0) DDR <= D_o;
-		if(A_o == 1) PORT <= D_o;
-	end
-end
 
 cpu65 cpu(
 	.PH0IN(clk_i),
@@ -329,7 +312,25 @@ cpu65 cpu(
 	.D_oe(D_oe),
 	.sync_irqs(!(select_6502 ? io_in[14] : io_in[8])), //Turned ON by bonding to ground
 	.sync_rdy(io_in[27]), //Turned OFF by bonding to ground
-	.rdy_writes(!(select_6502 ? io_in[2] : io_in[7])) //Turned ON by bonding to ground
+	.rdy_writes(!(select_6502 ? io_in[2] : io_in[7])), //Turned ON by bonding to ground
+	.do_latency(select_6502 ? io_in[3] : io_in[5]) //Turned OFF by bonding to ground
 );
+
+always @(negedge clk_i) begin
+	if(!rst_n) begin
+		//If 6510 is selected and pad 6 is NOT bonded to ground,
+		//pre-load DDR and PORT with correct values for a C64
+		if(!select_6502 && io_in[6]) begin
+			DDR <= 8'b00101111;
+			PORT <= 8'b00100111;
+		end else begin
+			DDR <= 8'h00;
+			PORT <= 8'h00;
+		end
+	end else if(!RWn) begin
+		if(A_o == 0) DDR <= D_o;
+		if(A_o == 1) PORT <= D_o;
+	end
+end
 
 endmodule

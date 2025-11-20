@@ -1,0 +1,9 @@
+[submodule "macros/MiscStuff/src/external/tt-waferspace-vga-screensaver"]
+	path = macros/MiscStuff/src/external/tt-waferspace-vga-screensaver
+	url = https://github.com/TinyTapeout/tt-waferspace-vga-screensaver
+[submodule "macros/MiscStuff/src/external/ttgf-vga-tiny-tapeout-animated-logo"]
+	path = macros/MiscStuff/src/external/ttgf-vga-tiny-tapeout-animated-logo
+	url = https://github.com/rejunity/ttgf-vga-tiny-tapeout-animated-logo
+[submodule "macros/MiscStuff/gf180mcu_as_ex_mcu7t5v0"]
+	path = macros/MiscStuff/gf180mcu_as_ex_mcu7t5v0
+	url = https://github.com/AvalonSemiconductors/gf180mcu_as_ex_mcu7t5v0

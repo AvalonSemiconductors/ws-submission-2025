@@ -1,0 +1,30 @@
+meta:
+  version: 3
+  flow: Classic
+  substituting_steps:
+    KLayout.DRC: null
+    Checker.KLayoutDRC: null
+    OpenROAD.Resizertimingpostcts: null
+    OpenROAD.CTS: null
+    OpenROAD.RepairDesignPostGPL: null
+    OpenROAD.STAMidPnr: null
+
+# DO CHANGE
+DESIGN_NAME: repeater
+VERILOG_FILES: dir::src/repeater.v
+CLOCK_PERIOD: 20
+DIE_AREA: [0, 0, 200, 200]
+RUN_MAGIC_DRC: true
+MAX_FANOUT_CONSTRAINT: 4
+MAX_TRANSITION_CONSTRAINT: 0.7
+CLOCK_PORT: clk_i
+CLOCK_NET: clk_i
+VDD_NETS: ["VDD"]
+GND_NETS: ["VSS"]
+VERILOG_POWER_DEFINE: "USE_POWER_PINS"
+RT_MAX_LAYER: Metal4
+FP_PIN_ORDER_CFG: dir::pin_order.cfg
+FP_PDN_MULTILAYER: false
+FP_SIZING: absolute
+PNR_SDC_FILE: dir::base.sdc
+SIGNOFF_SDC_FILE: dir::base.sdc

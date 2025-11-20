@@ -254,10 +254,12 @@
 #define I_SHX_A16Y 0x9E
 #define I_SHA_A16Y 0x9F
 
+#define I_MUL 0xB2
+
 const uint8_t implied_nops[] = {0x1A, 0x3A, 0x5A, 0x7A, 0xDA, 0xEA, 0xFA, 0};
 const uint8_t immediate_nops[] = {0x80, 0x82, 0xC2, 0xE2, 0x89, 0};
 const uint8_t a8_nops[] = {0x04, 0x44, 0x64, 0};
-const uint8_t a8x_nops[] = {0x14, 0x34, 0x54, 0x74, 0xD4, 0xF4, 0};
+const uint8_t a8x_nops[] = {0x14, 0x34, 0x54, 0x74, 0xD4, 0};
 const uint8_t a16x_nops[] = {0x1C, 0x3C, 0x5C, 0x7C, 0xDC, 0xFC, 0};
 
 static Vcpu65_tb top;
@@ -869,6 +871,17 @@ int main(int argc, char** argv, char** env) {
 	verify_store_instructions();
 	std::cout << std::endl << "### CLASS: XAA ###" << std::endl;
 	verify_xaa_instruction();
+	std::cout << std::endl << "### CLASS: EXTRA ###" << std::endl;
+	set_register_value(REG_A, 0x69);
+	set_register_value(REG_Y, 0x33);
+	uint16_t expected = 0x14EB;
+	immediate_instruction_exec(I_MUL, distByte(rng));
+	capture_state();
+	implied_instruction_exec(I_NOP_IMM);
+	expect_register_changes(REG_A + REG_Y);
+	assert_c(top.reg_A == (expected & 0xFF));
+	assert_c(top.reg_Y == (expected >> 8));
+	expect_flags_clear(FLAG_N + FLAG_Z);
 	
 	std::cout << std::endl << "VERIFYING RDY" << std::endl;
 	set_register_value(REG_A, 0xFF);
@@ -1683,6 +1696,14 @@ void verify_zp_x_instructions() {
 		expect_flag_changes(0);
 		expect_register_changes(0);
 	}
+	std::cout << "NOP a8,X (f4 - detect instruction)" << std::endl;
+	immediate_instruction_exec(I_CLV, distByte(rng));
+	implied_instruction_exec(0xF4); //Detect instructions
+	capture_state();
+	zp_x_instruction_exec(I_NOP_IMM, distByte(rng), distByte(rng));
+	expect_flag_changes(FLAG_V);
+	expect_register_changes(0);
+	expect_flags_set(FLAG_V);
 	std::cout << "LDA a8,X" << std::endl;
 	set_register_value(REG_X, (distByte(rng) & 0x7F) | 3);
 	uint8_t value = distByte(rng) | 0x80;
@@ -1769,7 +1790,8 @@ void verify_abs_instructions() {
 	capture_state();
 	abs_instruction_exec(I_CMP_A16, distWord(rng), 0x30);
 	expect_register_changes(REG_A);
-	expect_flag_changes(0);
+	expect_flag_changes(FLAG_V);
+	expect_flags_clear(FLAG_V);
 	assert_c(top.reg_A == 0xDD);
 	std::cout << "CMP a16" << std::endl;
 	capture_state();

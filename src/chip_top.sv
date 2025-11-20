@@ -14,7 +14,8 @@ module chip_top #(
     inout  wire       clk_PAD,
     inout  wire [4:0] design_sel_PAD,
     
-    inout  wire [NUM_BIDIR-1:0] bidir_PAD
+    inout  wire [NUM_BIDIR-1:0] bidir_PAD,
+    inout  wire [11:0] analog_PAD
 );
 
     wire clk_PAD2CORE;
@@ -32,18 +33,18 @@ module chip_top #(
     wire [6:0] const_zero;
     wire [4:0] const_one;
     
-    wire vic_luma;
-    wire vic_chroma;
-    wire sid_pot_x;
-    wire sid_pot_y;
-    wire sid_audio_0_vic_r;
-    wire sid_audio_1_vic_g;
-    wire vic_b;
-    wire spare_analog_0;
-    wire spare_analog_1;
-    wire spare_analog_2;
-    wire spare_analog_3;
-    wire spare_analog_4;
+    wire vic_luma = analog_PAD[0];
+    wire vic_chroma = analog_PAD[1];
+    wire vga_r = analog_PAD[2];
+    wire vga_g = analog_PAD[3];
+    wire vga_b = analog_PAD[4];
+    wire sid_audio_0 = analog_PAD[5];
+    wire sid_audio_1 = analog_PAD[6];
+    wire spare_analog_0 = analog_PAD[7];
+    wire spare_analog_1 = analog_PAD[8];
+    wire spare_analog_2 = analog_PAD[9];
+    wire spare_analog_3 = analog_PAD[10];
+    wire spare_analog_4 = analog_PAD[11];
 
     // Power / ground IO pad instances
 
@@ -239,6 +240,23 @@ module chip_top #(
     end
     endgenerate
     
+    wire [41:0] io_in_buffered;
+    wire [4:0] design_sel_buffered;
+    wire clk_buffered;
+    
+    repeater repeater(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .clk_i(clk_PAD2CORE),
+        .clk_o(clk_buffered),
+        .io_in(bidir_PAD2CORE),
+        .design_sel(design_sel_PAD2CORE),
+        .io_in_buffered(io_in_buffered),
+        .design_sel_buffered(design_sel_buffered)
+    );
+    
     wire [41:0] io_out_6502;
     wire [41:0] io_oe_6502;
     wire rst_override_n_6502;
@@ -251,6 +269,17 @@ module chip_top #(
     wire [41:0] io_out_sid;
     wire [2:0] io_oe_sid;
     wire rst_override_n_sid;
+    
+    wire [41:0] io_out_gpiochip;
+    wire [16:0] io_oe_gpiochip;
+    wire [15:0] io_pu_gpiochip;
+    wire [15:0] io_pd_gpiochip;
+    wire rst_override_n_gpiochip;
+    
+    wire [41:0] io_out_dram_controller;
+    wire rst_override_n_dram_controller;
+    
+    wire rst_override_n_ntsc;
     
     multiplexer multiplexer(
     `ifdef USE_POWER_PINS
@@ -280,7 +309,18 @@ module chip_top #(
         
         .io_out_sid(io_out_sid),
         .io_oe_sid(io_oe_sid),
-        .rst_override_n_sid(rst_override_n_sid)
+        .rst_override_n_sid(rst_override_n_sid),
+        
+        .io_out_gpiochip(io_out_gpiochip),
+        .io_oe_gpiochip(io_oe_gpiochip),
+        .io_pu_gpiochip(io_pu_gpiochip),
+        .io_pd_gpiochip(io_pd_gpiochip),
+        .rst_override_n_gpiochip(rst_override_n_gpiochip),
+        
+        .io_out_dram_controller(io_out_dram_controller),
+        .rst_override_n_dram_controller(rst_override_n_dram_controller),
+        
+        .rst_override_n_ntsc(rst_override_n_ntsc)
     );
     
     as65x as65x(
@@ -303,11 +343,17 @@ module chip_top #(
     `endif
         .clk_i(clk_PAD2CORE),
         .rst_override_n(rst_override_n_c64pla),
-        .io_in(bidir_PAD2CORE),
+        .io_in_buffered(io_in_buffered),
         .io_out(io_out_c64pla),
         .io_oe(io_oe_c64pla)
     );
     
+    wire [11:0] gpiochip_sample_1;
+    wire [11:0] gpiochip_sample_2;
+    wire [11:0] gpiochip_sample_3;
+    wire [11:0] sample_raw_1;
+    wire [11:0] sample_raw_2;
+    wire [11:0] sample_raw_3;
     sid sid(
     `ifdef USE_POWER_PINS
         .VSS(VSS),
@@ -315,9 +361,139 @@ module chip_top #(
     `endif
         .clk_i(clk_PAD2CORE),
         .rst_override_n(rst_override_n_sid),
-        .io_in(bidir_PAD2CORE),
+        .io_in_buffered(io_in_buffered),
         .io_out(io_out_sid),
-        .io_oe(io_oe_sid)
+        .io_oe(io_oe_sid),
+        .gpiochip_sample_1(gpiochip_sample_1),
+        .gpiochip_sample_2(gpiochip_sample_2),
+        .gpiochip_sample_3(gpiochip_sample_3),
+        .sample_raw_1(sample_raw_1),
+        .sample_raw_2(sample_raw_2),
+        .sample_raw_3(sample_raw_3)
+    );
+    
+    (* keep *)
+    r2r_dac_buffered dac0(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .D0(sample_raw_1[0]),
+        .D1(sample_raw_1[1]),
+        .D2(sample_raw_1[2]),
+        .D3(sample_raw_1[3]),
+        .D4(sample_raw_1[4]),
+        .D5(sample_raw_1[5]),
+        .D6(sample_raw_1[6]),
+        .D7(sample_raw_1[7]),
+        .D8(sample_raw_1[8]),
+        .D9(sample_raw_1[9]),
+        .D10(sample_raw_1[10]),
+        .D11(sample_raw_1[11]),
+        .OUT(analog_PAD[5])
+    );
+    
+    (* keep *)
+    r2r_dac_buffered dac1(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .D0(sample_raw_2[0]),
+        .D1(sample_raw_2[1]),
+        .D2(sample_raw_2[2]),
+        .D3(sample_raw_2[3]),
+        .D4(sample_raw_2[4]),
+        .D5(sample_raw_2[5]),
+        .D6(sample_raw_2[6]),
+        .D7(sample_raw_2[7]),
+        .D8(sample_raw_2[8]),
+        .D9(sample_raw_2[9]),
+        .D10(sample_raw_2[10]),
+        .D11(sample_raw_2[11]),
+        .OUT(analog_PAD[6])
+    );
+    
+    (* keep *)
+    r2r_dac_buffered dac2(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .D0(sample_raw_3[0]),
+        .D1(sample_raw_3[1]),
+        .D2(sample_raw_3[2]),
+        .D3(sample_raw_3[3]),
+        .D4(sample_raw_3[4]),
+        .D5(sample_raw_3[5]),
+        .D6(sample_raw_3[6]),
+        .D7(sample_raw_3[7]),
+        .D8(sample_raw_3[8]),
+        .D9(sample_raw_3[9]),
+        .D10(sample_raw_3[10]),
+        .D11(sample_raw_3[11]),
+        .OUT(analog_PAD[7])
+    );
+    
+    gpiochip gpiochip(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .clk_i(clk_PAD2CORE),
+        .rst_override_n(rst_override_n_gpiochip),
+        .io_in(bidir_PAD2CORE),
+        .io_out(io_out_gpiochip),
+        .io_oe(io_oe_gpiochip),
+        .io_pu(io_pu_gpiochip),
+        .io_pd(io_pd_gpiochip),
+        .adc_out_1(gpiochip_sample_1),
+        .adc_out_2(gpiochip_sample_2),
+        .adc_out_3(gpiochip_sample_3)
+    );
+    
+    dram_controller dram_controller(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .clk_i(clk_PAD2CORE),
+        .rst_override_n(rst_override_n_dram_controller),
+        .io_out(io_out_dram_controller),
+        .io_in_buffered(io_in_buffered)
+    );
+    
+    wire [11:0] sample_raw_ntsc;
+    ntsc ntsc(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .clk_i(clk_PAD2CORE),
+        .rst_override_n(rst_override_n_ntsc),
+        .io_in_buffered(io_in_buffered),
+        .sample_raw_1(sample_raw_ntsc)
+    );
+    
+    (* keep *)
+    r2r_dac_buffered dac3(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .D0(sample_raw_ntsc[0]),
+        .D1(sample_raw_ntsc[1]),
+        .D2(sample_raw_ntsc[2]),
+        .D3(sample_raw_ntsc[3]),
+        .D4(sample_raw_ntsc[4]),
+        .D5(sample_raw_ntsc[5]),
+        .D6(sample_raw_ntsc[6]),
+        .D7(sample_raw_ntsc[7]),
+        .D8(sample_raw_ntsc[8]),
+        .D9(sample_raw_ntsc[9]),
+        .D10(sample_raw_ntsc[10]),
+        .D11(sample_raw_ntsc[11]),
+        .OUT(vic_luma)
     );
     
     (* keep *)
@@ -328,7 +504,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vic_luma)
+        .ASIG5V(analog_PAD[5])
     );
     
     (* keep *)
@@ -339,7 +515,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vic_chroma)
+        .ASIG5V(spare_analog_4)
     );
     
     (* keep *)
@@ -350,7 +526,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(sid_pot_y)
+        .ASIG5V(spare_analog_3)
     );
     
     (* keep *)
@@ -361,7 +537,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(sid_pot_x)
+        .ASIG5V(spare_analog_2)
     );
     
     (* keep *)
@@ -372,7 +548,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(sid_audio_0_vic_r)
+        .ASIG5V(vic_luma)
     );
     
     (* keep *)
@@ -383,7 +559,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(sid_audio_1_vic_g)
+        .ASIG5V(analog_PAD[6])
     );
     
     (* keep *)
@@ -394,7 +570,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vic_b)
+        .ASIG5V(vga_b)
     );
     
     (* keep *)
@@ -405,7 +581,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_0)
+        .ASIG5V(vic_chroma)
     );
     
     (* keep *)
@@ -416,7 +592,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_1)
+        .ASIG5V(vga_r)
     );
     
     (* keep *)
@@ -427,7 +603,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_2)
+        .ASIG5V(vga_g)
     );
     
     (* keep *)
@@ -438,7 +614,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_3)
+        .ASIG5V(analog_PAD[7])
     );
     
     (* keep *)
@@ -449,7 +625,7 @@ module chip_top #(
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_4)
+        .ASIG5V(spare_analog_1)
     );
     
     // Die ID - do not remove, necessary for tapeout

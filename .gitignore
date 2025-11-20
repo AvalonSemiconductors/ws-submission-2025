@@ -3,6 +3,7 @@ __pycache__/
 gf180mcu_pdk/
 gf180_drc.lyrdb
 sim_build/
+results.xml
 final/
 librelane_install/
 */runs/

@@ -58,7 +58,7 @@ west_pads = list(map(prettify_pad_name, west_pads))
 im = Image.new('RGB', (die_width + text_margin * 2, die_height + text_margin * 2), (128, 128, 128))
 draw = ImageDraw.Draw(im)
 draw.rectangle((0, 0, im.width, im.height), fill=bg_fill)
-draw.rectangle((core_offset_x, core_offset_y, core_offset_x + core_width, core_offset_y + core_height), outline=(0,0,0))
+draw.rectangle((core_offset_x + text_margin, core_offset_y + text_margin, core_offset_x + core_width, core_offset_y + core_height), outline=(0,0,0))
 
 def draw_pads(pads, offset, direction, side, reverse = False):
 	scale = core_height / len(pads)
@@ -122,10 +122,10 @@ with open('librelane/config.yaml', 'r') as file:
 						for instance in macros[m]['instances']:
 							location = macros[m]['instances'][instance]['location']
 							location[0] += text_margin
-							location[1] += text_margin + core_offset_y
+							location[1] += text_margin
 							location[1] = im.height - location[1] - 1
-							draw.rectangle((location[0], location[1], location[0] + width, location[1] + height), outline=(0,0,0))
-							draw.text((location[0] + 5, location[1] - 36), m, fill=(0,0,0), font_size=32)
+							draw.rectangle((location[0], location[1] - height, location[0] + width, location[1]), outline=(0,0,0))
+							draw.text((location[0] + 5, location[1] - height - 36), m, fill=(0,0,0), font_size=32)
 						break
 
 im.save('padout.png')

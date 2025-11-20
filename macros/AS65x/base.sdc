@@ -80,7 +80,10 @@ if { [info exists ::env(OPENLANE_SDC_IDEAL_CLOCKS)] && $::env(OPENLANE_SDC_IDEAL
     set_propagated_clock [all_clocks]
 }
 
-set_input_delay -min 2.5 -clock $clocks [get_port rst_override_n]
-set_input_delay -max 5 -clock $clocks [get_port rst_override_n]
-set_input_delay -min 2.5 -clock $clocks [get_port select_6502]
-set_input_delay -max 5 -clock $clocks [get_port select_6502]
+set_input_delay -min 2.5 -clock $clocks -clock_fall [get_port rst_override_n]
+set_input_delay -max 5 -clock $clocks -clock_fall [get_port rst_override_n]
+set_input_delay -min 2.5 -clock $clocks -clock_fall [get_port select_6502]
+set_input_delay -max 5 -clock $clocks -clock_fall [get_port select_6502]
+
+#To accomodate slower machines the cpu may be used in, provide some additional hold time (at the cost of max clock rate)
+set_output_delay -min 10 -clock $clocks -clock_fall [get_ports {io_out[*]}]

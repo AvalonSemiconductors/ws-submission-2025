@@ -1,0 +1,35 @@
+DESIGN_NAME: wrapped_qcpu
+VERILOG_FILES: ["dir::src/multiplier.v", "dir::src/qcpu.v", "dir::src/spi.v", "dir::src/uart.v", "dir::src/wrapped_qcpu.v"]
+
+CLOCK_PORT: clk_i
+CLOCK_PERIOD: 15
+MAX_FANOUT_CONSTRAINT: 4
+RUN_CTS: true
+PL_RESIZER_HOLD_MAX_BUFFER_PCT: 100
+
+SYNTH_STRATEGY: DELAY 4
+
+RT_MAX_LAYER: Metal4
+
+LIB:
+  "*_tt_025C_5v00": ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__tt_025C_5v00.lib", "dir::../gf180mcu_extra_cells/lib/gf180mcu_extra__tt_025C_5v00.lib"]
+  "*_ss_125C_4v50": ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ss_125C_4v50.lib", "dir::../gf180mcu_extra_cells/lib/gf180mcu_extra__ss_125C_4v50.lib"]
+  "*_ff_n40C_5v50": ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lib/gf180mcu_fd_sc_mcu7t5v0__ff_n40C_5v50.lib", "dir::../gf180mcu_extra_cells/lib/gf180mcu_extra__ff_n40C_5v50.lib"]
+CELL_LEFS: ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/lef/gf180mcu_fd_sc_mcu7t5v0.lef", "dir::../gf180mcu_extra_cells/lef/gf180mcu_extra.lef"]
+CELL_GDS: ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/gds/gf180mcu_fd_sc_mcu7t5v0.gds", "dir::../gf180mcu_extra_cells/gds/gf180mcu_extra__dfxtp_2.gds", "dir::../gf180mcu_extra_cells/gds/gf180mcu_extra__dfxtn_2.gds"]
+CELL_VERILOG_MODELS: ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/verilog/gf180mcu_fd_sc_mcu7t5v0.v", "pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/verilog/primitives.v", "dir::../gf180mcu_extra_cells/verilog/gf180mcu_extra.v"]
+CELL_SPICE_MODELS: ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/spice/gf180mcu_fd_sc_mcu7t5v0.spice", "dir::../gf180mcu_extra_cells/spice/gf180mcu_extra.spice"]
+
+EXTRA_EXCLUDED_CELLS: ["gf180mcu_fd_sc_mcu7t5v0__dff*", "*_1"]
+
+IO_PIN_ORDER_CFG: dir::pin_order.cfg
+PDN_MULTILAYER: false
+FP_SIZING: absolute
+DIE_AREA: [0, 0, 550, 550]
+
+RUN_MAGIC_DRC: true
+RUN_KLAYOUT_DRC: false
+
+VDD_NETS: ["vdd"]
+GND_NETS: ["vss"]
+VERILOG_POWER_DEFINE: "USE_POWER_PINS"

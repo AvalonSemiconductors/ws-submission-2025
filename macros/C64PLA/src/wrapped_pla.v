@@ -8,7 +8,7 @@ module c64pla(
 	input clk_i,
 	input rst_override_n,
 	
-	input [41:0] io_in,
+	input [41:0] io_in_buffered,
 	output [41:0] io_out,
 	output io_oe
 );
@@ -22,8 +22,8 @@ wire KERNALn_fast;
 wire BASICn_fast;
 wire CASRAMn_fast;
 
-wire speed_sel = io_in[37];
-wire [1:0] speed_sel_cas = io_in[39:38];
+wire speed_sel = io_in_buffered[37];
+wire [1:0] speed_sel_cas = io_in_buffered[39:38];
 
 //A "modern" process node like GF180 produces way too fast logic - there would be timing violations (particularly holds) all over the C64
 //So, delay needs to be intentionally added through delay buffer cells
@@ -137,15 +137,15 @@ cond_delay dyl_basicn(
 );
 
 pla pla(
-	.FE(io_in[7]),
-	.A13(io_in[8]),
-	.A14(io_in[9]),
-	.A15(io_in[10]),
-	.VA14n(io_in[12]),
-	.CHARENn(io_in[13]),
-	.HIRAMn(io_in[14]),
-	.LORAMn(io_in[19]),
-	.CASn(io_in[20]),
+	.FE(io_in_buffered[7]),
+	.A13(io_in_buffered[8]),
+	.A14(io_in_buffered[9]),
+	.A15(io_in_buffered[10]),
+	.VA14n(io_in_buffered[12]),
+	.CHARENn(io_in_buffered[13]),
+	.HIRAMn(io_in_buffered[14]),
+	.LORAMn(io_in_buffered[19]),
+	.CASn(io_in_buffered[20]),
 	.ROMHn(ROMHn_fast),
 	.ROMLn(ROMLn_fast),
 	.IOn(IOn_fast),
@@ -154,15 +154,15 @@ pla pla(
 	.KERNALn(KERNALn_fast),
 	.BASICn(BASICn_fast),
 	.CASRAMn(CASRAMn_fast),
-	.OEn(io_in[32]),
-	.VA12(io_in[33]),
-	.VA13(io_in[35]),
-	.GAMEn(io_in[40]),
-	.EXROMn(io_in[41]),
-	.RWn(io_in[0]),
-	.AECn(io_in[1]),
-	.BA(io_in[2]),
-	.A12(io_in[3])
+	.OEn(io_in_buffered[32]),
+	.VA12(io_in_buffered[33]),
+	.VA13(io_in_buffered[35]),
+	.GAMEn(io_in_buffered[40]),
+	.EXROMn(io_in_buffered[41]),
+	.RWn(io_in_buffered[0]),
+	.AECn(io_in_buffered[1]),
+	.BA(io_in_buffered[2]),
+	.A12(io_in_buffered[3])
 );
 assign io_out[20:0] = 0;
 assign io_out[21] = ROMHn;
@@ -176,7 +176,7 @@ assign io_out[29:28] = 0;
 assign io_out[30] = BASICn;
 assign io_out[31] = CASRAMn;
 assign io_out[41:32] = 0;
-assign io_oe = !io_in[32];
+assign io_oe = !io_in_buffered[32];
 
 endmodule
 

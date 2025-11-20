@@ -41,8 +41,8 @@ initial begin
 		memory[i] = 0;
 	end
 	i = 0;
-	//$readmemh("../6502_functional_test.txt", memory, 'hA, 'hFFFF);
-	$readmemh("../6502_decimal_test.txt", memory, 'h0400, 'hFFFF);
+	$readmemh("../6502_functional_test.txt", memory, 'hA, 'hFFFF);
+	//$readmemh("../6502_decimal_test.txt", memory, 'h0400, 'hFFFF);
 	memory['hFFFC] = 8'h00;
 	memory['hFFFD] = 8'h04;
 end
@@ -100,7 +100,7 @@ cpu65 cpu65(
 `ifdef TRACE_ON
 reg tracing = 0;
 always @(posedge clk_i) begin
-	if(i == 3470000) begin
+	if(i == 2) begin
 		if(!tracing) begin
 			tracing <= 1;
 			$dumpfile ("tb.vcd");

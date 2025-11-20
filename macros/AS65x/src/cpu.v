@@ -34,7 +34,8 @@ module cpu65(
 	
 	input sync_irqs,
 	input sync_rdy,
-	input rdy_writes
+	input rdy_writes,
+	input do_latency
 );
 
 `ifdef BENCH
@@ -61,6 +62,9 @@ reg [15:0] PC;
 reg [7:0] mem_buffer;
 reg [15:0] address_buffer;
 reg [1:0] rmw_state;
+reg [2:0] chirp_ptr;
+reg [6:0] chirpchar;
+reg [37:0] rng;
 
 reg irqn_sync;
 reg nmin_sync;
@@ -98,7 +102,8 @@ wire nmi_edge_detect = nmi_actual && !nmi_edge;
 /*
  * Decode instruction type
  */
-wire needs_one_byte = ireg[3:2] == 2'b01 || (ireg[3:2] == 2'b00 && ireg[0]) || (ireg[3:0] == 4'h0 && (ireg[4] || ireg[7])) || (ireg[3:0] == 4'h2 && ireg[4] && ireg[7]) || (ireg[3] && !ireg[2] && ireg[0] && !ireg[4]);
+wire is_jam = ireg[3:0] == 4'h2 && (!ireg[7] || ireg[4]);
+wire needs_one_byte = ireg[3:2] == 2'b01 || (ireg[3:2] == 2'b00 && ireg[0]) || (ireg[3:0] == 4'h0 && (ireg[4] || ireg[7])) || (ireg[3:0] == 4'h2 && ireg[4] && ireg[7] && !is_jam) || (ireg[3] && !ireg[2] && ireg[0] && !ireg[4]);
 wire needs_two_bytes = ireg[3:2] == 2'b11 || (ireg[3] && !ireg[2] && ireg[0] && ireg[4]);
 wire is_pull = ireg == 8'h28 || ireg == 8'h68;
 wire is_rts = ireg == 8'h60;
@@ -110,7 +115,7 @@ wire type_indirect16 = ireg == 8'h6C;
 wire type_jump = ireg == 8'h4C || type_indirect16;
 wire type_return = ireg[3:0] == 0 && !ireg[4] && ireg[7:6] == 2'b01;
 wire type_break = ireg == 8'h00;
-wire type_implied = (ireg[3:0] == 4'h8 || ireg[3:0] == 4'hA) && !is_pull && !is_push;
+wire type_implied = (ireg[3:0] == 4'h8 || ireg[3:0] == 4'hA || is_jam) && !is_pull && !is_push;
 wire type_imm = ((ireg[3] && !ireg[2] && ireg[0]) || (ireg[7] && !ireg[3] && !ireg[2] && !ireg[0])) && !ireg[4];
 wire type_zeropage = !ireg[3] && needs_one_byte && !type_branch && !type_imm;
 wire zp_indirect = ireg[3:2] == 2'b00 && ireg[0];
@@ -182,7 +187,7 @@ wire bus_flag_N = processed_bus[7];
 wire bus_flag_Z = processed_bus == 0;
 
 wire write_A = (is_alu || (is_pull && ireg[6]) || anc_column || (is_load && ireg[0]) || ireg == 8'h98 || ireg == 8'h8A || ireg == 8'h8B || (type_implied && is_shifted)) && !is_compare && !is_sbx && !is_doc_rmw;
-wire write_X = (ireg[7:5] == 3'b101 && ireg[1]) || ireg == 8'hE8 || ireg == 8'hCA;
+wire write_X = (ireg[7:5] == 3'b101 && ireg[1] && !is_jam) || ireg == 8'hE8 || ireg == 8'hCA;
 wire write_Y = (ireg[7:5] == 3'b101 && ireg[1:0] == 2'b00 && is_load) || ireg == 8'hC8 || ireg == 8'hA8 || ireg == 8'h88;
 wire write_SP = ireg == 8'h9A || ireg == 8'h9B || ireg == 8'hBB || is_shs;
 
@@ -224,7 +229,7 @@ always @(*) begin
 	end
 end
 assign D_o = dout_combo;
-assign D_oe = (!RWn && PH0IN) && AEC;
+assign D_oe = (!RWn && (PH0IN || !do_latency)) && AEC;
 
 reg [15:0] addr_out_combo;
 always @(*) begin
@@ -257,6 +262,10 @@ multiplier65 multiplier(
 );
 `endif
 
+wire [7:0] ALU_in_1 = anded_bus;
+wire [7:0] ALU_in_2 = is_arr ? mem_buffer : processed_bus;
+wire ALU_carry_in = is_undoc_rmw ? (ireg[7] | shifter_carry_out) : C;
+
 //Accurate emulation of the 6502 decimal mode, including behavior on invalid BCD values, gets incredibly ugly
 //I love how I have to make this intentionally worse by having the non-straight-forward flag outputs
 wire [7:0] adder_in_1 = ALU_in_1;
@@ -282,9 +291,6 @@ wire [8:0] bcd_adjust_adder_out = {adder_out[8], adder_out[7:4] + bcd_adjust_hi,
 
 //I think ALU_in_1 is the result of bus ANDing
 //ALU_in_2 is the result of either A or M being shifted and incremented/decremented
-wire [7:0] ALU_in_1 = anded_bus;
-wire [7:0] ALU_in_2 = is_arr ? mem_buffer : processed_bus;
-wire ALU_carry_in = is_undoc_rmw ? (ireg[7] | shifter_carry_out) : C;
 reg [8:0] ALU_out;
 always @(*) begin
 	case(ireg[7:5])
@@ -503,6 +509,8 @@ always @(negedge PH0IN) begin
 			//MUL - Y,A <= Y * A
 			Y <= mul_o[15:8];
 			A <= mul_o[7:0];
+			Z <= mul_o == 0;
+			N <= mul_o[15];
 		end
 		if(ireg == 8'h92 && state[1]) begin
 			//Reserved: prefix for more extended instructions in the future
@@ -558,9 +566,6 @@ task update_regs;
 endtask
 
 //Pssssst! Secret!
-
-reg [2:0] chirp_ptr;
-reg [6:0] chirpchar;
 always @(*) begin
 	case(chirp_ptr)
 		0: chirpchar = 7'h43;
@@ -575,7 +580,6 @@ always @(*) begin
 end
 
 //For COR
-reg [37:0] rng;
 always @(negedge PH0IN) begin
 	if(!rst_n) rng[0] <= 1'b1;
 	else rng <= {rng[36:0], rng[37] ^ rng[36] ^ rng[32] ^ rng[31]};

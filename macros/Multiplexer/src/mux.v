@@ -28,6 +28,17 @@ module multiplexer(
 	input [2:0] io_oe_sid,
 	output rst_override_n_sid,
 	
+	input [41:0] io_out_gpiochip,
+	input [16:0] io_oe_gpiochip,
+	input [15:0] io_pu_gpiochip,
+	input [15:0] io_pd_gpiochip,
+	output rst_override_n_gpiochip,
+	
+	input [41:0] io_out_dram_controller,
+	output rst_override_n_dram_controller,
+	
+	output rst_override_n_ntsc,
+	
 	output [4:0] const_one,
 	output [6:0] const_zero,
 	input [4:0] design_sel
@@ -58,7 +69,7 @@ always @(*) begin
 		io_out_sel = io_out_6502;
 		io_cs_sel = select_6502 ? {31'h0, 1'b1, 1'b0, 2'b11, 7'h0} : {31'h0, 2'b11, 4'h0, 1'b1, 4'h0};
 		io_pd_sel = 0;
-		io_pu_sel = select_6502 ? {14'h0, 1'b1, 12'h0, 1'b1, 8'h0, 1'b1, 2'h0, 1'b1, 1'b0, 1'b1} : {14'h0, 1'b1, 14'h0, 1'b1, 3'h0, 2'b11, 7'h0};
+		io_pu_sel = select_6502 ? {14'h0, 1'b1, 12'h0, 1'b1, 8'h0, 1'b1, 2'h1, 1'b1, 1'b0, 1'b1} : {14'h0, 1'b1, 14'h0, 1'b1, 3'h0, 2'b11, 1'b0, 1'b1, 5'h0};
 	end else begin
 		case(design_sel)
 			default: begin
@@ -82,6 +93,27 @@ always @(*) begin
 				io_pd_sel = {2'b0, 1'b1, 39'h0};
 				io_pu_sel = 0;
 			end
+			5'b11010: begin
+				io_oe_sel = {1'b1, 1'b0, io_oe_gpiochip[16:1], 3'b000, {8{io_oe_gpiochip[0]}}, 6'h00, 4'hF, 1'b0, 2'b11};
+				io_out_sel = io_out_gpiochip;
+				io_cs_sel = {1'b0, 1'b1, 38'h0, 1'b1, 1'b0};
+				io_pd_sel = {2'b00, io_pd_gpiochip, 24'h0};
+				io_pu_sel = {1'b0, 1'b1, io_pu_gpiochip, 2'b00, 1'b1, 21'h0};
+			end
+			5'b11001: begin
+				io_out_sel = io_out_dram_controller;
+				io_oe_sel = {1'b1, 1'b1, 1'b1, 1'b0, 1'b1, 1'b1, 1'b1, 6'h3F, 1'b0, 2'b11, 3'b0, 16'h0, 3'h7, 1'b0, 1'b0, 1'b1, 1'b0};
+				io_cs_sel = 0;
+				io_pd_sel = {13'h0, 1'b1, 24'h0, 1'b1, 2'b0, 1'b1};
+				io_pu_sel = {16'h0, 3'b111, 23'h0};
+			end
+			5'b11000: begin
+				io_out_sel = 0;
+				io_oe_sel = 0;
+				io_cs_sel = 0;
+				io_pd_sel = 42'h3FFFFFFFFFF;
+				io_pu_sel = 0;
+			end
 		endcase
 	end
 end
@@ -89,5 +121,8 @@ end
 assign rst_override_n_6502 = is_6502;
 assign rst_override_n_c64pla = design_sel == 5'b11110;
 assign rst_override_n_sid = design_sel == 5'b11011;
+assign rst_override_n_gpiochip = design_sel == 5'b11010;
+assign rst_override_n_dram_controller = design_sel == 5'b11001;
+assign rst_override_n_ntsc = design_sel == 5'b11000;
 
 endmodule
