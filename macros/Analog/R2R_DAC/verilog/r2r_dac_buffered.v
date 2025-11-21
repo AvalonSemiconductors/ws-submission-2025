@@ -17,8 +17,10 @@ module r2r_dac_buffered(
 	input D10,
 	input D11,
 	
-	inout OUT
+	output OUT
 );
+
+assign OUT = 1'b0;
 
 `ifdef SIM
 real voltage;

@@ -1,0 +1,64 @@
+library (r2r_dac_buffered) {
+  input_threshold_pct_fall: 50.0;
+  input_threshold_pct_rise: 50.0;
+  output_threshold_pct_fall: 50.0;
+  output_threshold_pct_rise: 50.0;
+  slew_lower_threshold_pct_fall: 20.0;
+  slew_lower_threshold_pct_rise: 20.0;
+  slew_upper_threshold_pct_fall: 80.0;
+  slew_upper_threshold_pct_rise: 80.0;
+  
+  cell (r2r_dac_buffered) {
+		pin ("D0") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D1") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D2") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D3") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D4") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D5") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D6") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D7") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D8") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D9") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D10") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("D11") {
+			direction     : "input";
+			capacitance   : 0;
+		}
+		pin ("OUT") {
+			direction     : "output";
+		}
+  }
+}

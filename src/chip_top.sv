@@ -14,8 +14,7 @@ module chip_top #(
     inout  wire       clk_PAD,
     inout  wire [4:0] design_sel_PAD,
     
-    inout  wire [NUM_BIDIR-1:0] bidir_PAD,
-    inout  wire [11:0] analog_PAD
+    inout  wire [NUM_BIDIR-1:0] bidir_PAD
 );
 
     wire clk_PAD2CORE;
@@ -33,18 +32,18 @@ module chip_top #(
     wire [6:0] const_zero;
     wire [4:0] const_one;
     
-    wire vic_luma = analog_PAD[0];
-    wire vic_chroma = analog_PAD[1];
-    wire vga_r = analog_PAD[2];
-    wire vga_g = analog_PAD[3];
-    wire vga_b = analog_PAD[4];
-    wire sid_audio_0 = analog_PAD[5];
-    wire sid_audio_1 = analog_PAD[6];
-    wire spare_analog_0 = analog_PAD[7];
-    wire spare_analog_1 = analog_PAD[8];
-    wire spare_analog_2 = analog_PAD[9];
-    wire spare_analog_3 = analog_PAD[10];
-    wire spare_analog_4 = analog_PAD[11];
+    wire vic_luma;
+    wire vic_chroma;
+    wire vga_r;
+    wire vga_g;
+    wire vga_b;
+    wire sid_audio_0;
+    wire sid_audio_1;
+    wire spare_analog_0;
+    wire spare_analog_1;
+    wire spare_analog_2;
+    wire spare_analog_3;
+    wire spare_analog_4;
 
     // Power / ground IO pad instances
 
@@ -322,7 +321,7 @@ module chip_top #(
         
         .rst_override_n_ntsc(rst_override_n_ntsc)
     );
-    
+
     as65x as65x(
     `ifdef USE_POWER_PINS
         .VSS(VSS),
@@ -390,7 +389,7 @@ module chip_top #(
         .D9(sample_raw_1[9]),
         .D10(sample_raw_1[10]),
         .D11(sample_raw_1[11]),
-        .OUT(analog_PAD[5])
+        .OUT(sid_audio_0)
     );
     
     (* keep *)
@@ -411,7 +410,7 @@ module chip_top #(
         .D9(sample_raw_2[9]),
         .D10(sample_raw_2[10]),
         .D11(sample_raw_2[11]),
-        .OUT(analog_PAD[6])
+        .OUT(sid_audio_1)
     );
     
     (* keep *)
@@ -432,7 +431,7 @@ module chip_top #(
         .D9(sample_raw_3[9]),
         .D10(sample_raw_3[10]),
         .D11(sample_raw_3[11]),
-        .OUT(analog_PAD[7])
+        .OUT(spare_analog_0)
     );
     
     gpiochip gpiochip(
@@ -497,135 +496,147 @@ module chip_top #(
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_0(
+    gf180mcu_fd_io__asig_5p0_fixed analog_0(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(analog_PAD[5])
+        .ASIG5V(sid_audio_0),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_1(
+    gf180mcu_fd_io__asig_5p0_fixed analog_1(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_4)
+        .ASIG5V(spare_analog_4),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_2(
+    gf180mcu_fd_io__asig_5p0_fixed analog_2(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_3)
+        .ASIG5V(spare_analog_3),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_3(
+    gf180mcu_fd_io__asig_5p0_fixed analog_3(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_2)
+        .ASIG5V(spare_analog_2),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_4(
+    gf180mcu_fd_io__asig_5p0_fixed analog_4(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vic_luma)
+        .ASIG5V(vic_luma),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_5(
+    gf180mcu_fd_io__asig_5p0_fixed analog_5(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(analog_PAD[6])
+        .ASIG5V(sid_audio_1),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_6(
+    gf180mcu_fd_io__asig_5p0_fixed analog_6(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vga_b)
+        .ASIG5V(vga_b),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_7(
+    gf180mcu_fd_io__asig_5p0_fixed analog_7(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vic_chroma)
+        .ASIG5V(vic_chroma),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_8(
+    gf180mcu_fd_io__asig_5p0_fixed analog_8(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vga_r)
+        .ASIG5V(vga_r),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_9(
+    gf180mcu_fd_io__asig_5p0_fixed analog_9(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vga_g)
+        .ASIG5V(vga_g),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_10(
+    gf180mcu_fd_io__asig_5p0_fixed analog_10(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(analog_PAD[7])
+        .ASIG5V(spare_analog_0),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_11(
+    gf180mcu_fd_io__asig_5p0_fixed analog_11(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_1)
+        .ASIG5V(spare_analog_1),
+        .PAD()
     );
     
     // Die ID - do not remove, necessary for tapeout
@@ -637,6 +648,9 @@ module chip_top #(
     
     (* keep *)
     avali_logo avali_logo ();
+    
+    (* keep *)
+    aef2 aef2 ();
 
 endmodule
 

@@ -5,6 +5,7 @@ TOP = chip_top
 
 PDK_ROOT ?= $(MAKEFILE_DIR)/gf180mcu_pdk
 PDK ?= gf180mcuD
+PDK_TAG ?= 1.1.0
 
 .DEFAULT_GOAL := help
 
@@ -15,17 +16,29 @@ help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 .PHONY: help
 
-all: librelane ## Build the project (runs librelane)
+all: librelane ## Build the project (runs LibreLane)
 .PHONY: all
 
 clone-pdk: ## Clone the GF180MCU PDK repository
 	rm -rf $(MAKEFILE_DIR)/gf180mcu_pdk
-	git clone https://github.com/wafer-space/gf180mcu.git $(MAKEFILE_DIR)/gf180mcu_pdk --depth 1
+	git clone https://github.com/wafer-space/gf180mcu.git $(MAKEFILE_DIR)/gf180mcu_pdk --depth 1 --branch ${PDK_TAG}
 .PHONY: clone-pdk
 
-librelane: ## Run librelane flow (synthesis, PnR, verification)
+librelane: ## Run LibreLane flow (synthesis, PnR, verification)
 	librelane librelane/config.yaml --pdk ${PDK} --pdk-root ${PDK_ROOT} --manual-pdk
 .PHONY: librelane
+
+librelane-nodrc: ## Run LibreLane flow without DRC checks
+	librelane librelane/config.yaml --pdk ${PDK} --pdk-root ${PDK_ROOT} --manual-pdk --skip KLayout.DRC --skip Magic.DRC
+.PHONY: librelane-nodrc
+
+librelane-klayoutdrc: ## Run LibreLane flow without magic DRC checks
+	librelane librelane/config.yaml --pdk ${PDK} --pdk-root ${PDK_ROOT} --manual-pdk --skip Magic.DRC
+.PHONY: librelane-klayoutdrc
+
+librelane-magicdrc: ## Run LibreLane flow without KLayout DRC checks
+	librelane librelane/config.yaml --pdk ${PDK} --pdk-root ${PDK_ROOT} --manual-pdk --skip KLayout.DRC
+.PHONY: librelane-magicdrc
 
 librelane-openroad: ## Open the last run in OpenROAD
 	librelane librelane/config.yaml --pdk ${PDK} --pdk-root ${PDK_ROOT} --manual-pdk --last-run --flow OpenInOpenROAD
@@ -39,7 +52,7 @@ sim: ## Run RTL simulation with cocotb
 	cd cocotb; PDK_ROOT=${PDK_ROOT} PDK=${PDK} python3 chip_top_tb.py
 .PHONY: sim
 
-sim-gl: ## Run gate-level simulation with cocotb
+sim-gl: ## Run gate-level simulation with cocotb (after copy-final)
 	cd cocotb; GL=1 PDK_ROOT=${PDK_ROOT} PDK=${PDK} python3 chip_top_tb.py
 .PHONY: sim-gl
 
@@ -50,4 +63,9 @@ sim-view: ## View simulation waveforms in GTKWave
 copy-final: ## Copy final output files from the last run
 	rm -rf final/
 	cp -r librelane/runs/${RUN_TAG}/final/ final/
+.PHONY: copy-final
+
+render-image: ## Render an image from the final layout (after copy-final)
+	mkdir -p img/
+	PDK_ROOT=${PDK_ROOT} PDK=${PDK} python3 scripts/lay2img.py final/gds/${TOP}.gds img/${TOP}.png --width 2048 --oversampling 4
 .PHONY: copy-final
