@@ -1,17 +1,14 @@
 meta:
   version: 3
   flow: Classic
-  substituting_steps:
-    KLayout.DRC: null
-    Checker.KLayoutDRC: null
 
 # DO CHANGE
 DESIGN_NAME: misc
-VERILOG_FILES: ["dir::src/misc.v", "dir::src/blinker.v", "dir::src/dice.v", "dir::src/hellorld.v", "dir::src/nano.v", "dir::src/external/ttgf-vga-tiny-tapeout-animated-logo/src/project.v", "dir::src/external/ttgf-vga-tiny-tapeout-animated-logo/src/hvsync_generator.v", "dir::src/external/tt-waferspace-vga-screensaver/src/bitmap_rom.v", "dir::src/external/tt-waferspace-vga-screensaver/src/gamepad_pmod.v", "dir::src/external/tt-waferspace-vga-screensaver/src/palette.v", "dir::src/external/tt-waferspace-vga-screensaver/src/tt_um_waferspace_vga_screensaver.v", "dir::src/external/tt-waferspace-vga-screensaver/src/vga_sync_generator.v"]
-CLOCK_PERIOD: 25
-DIE_AREA: [0, 0, 600, 600]
+VERILOG_FILES: ["dir::src/misc.v", "dir::src/blinker.v", "dir::src/dice.v", "dir::src/hellorld.v", "dir::src/nano.v", "dir::src/mc.v", "dir::src/external/ttgf-vga-tiny-tapeout-animated-logo/src/project.v", "dir::src/external/ttgf-vga-tiny-tapeout-animated-logo/src/hvsync_generator.v", "dir::src/external/tt-waferspace-vga-screensaver/src/bitmap_rom.v", "dir::src/external/tt-waferspace-vga-screensaver/src/gamepad_pmod.v", "dir::src/external/tt-waferspace-vga-screensaver/src/palette.v", "dir::src/external/tt-waferspace-vga-screensaver/src/tt_um_waferspace_vga_screensaver.v", "dir::src/external/tt-waferspace-vga-screensaver/src/vga_sync_generator.v"]
+CLOCK_PERIOD: 35
+DIE_AREA: [0, 0, 500, 900]
 RUN_MAGIC_DRC: true
-SYNTH_STRATEGY: DELAY 4
+SYNTH_STRATEGY: AREA 0
 PL_RESIZER_SETUP_SLACK_MARGIN: 0.25
 GRT_RESIZER_SETUP_SLACK_MARGIN: 0.25
 GRT_RESIZER_HOLD_SLACK_MARGIN: 0.1
@@ -41,5 +38,5 @@ CELL_GDS: ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/gds/gf180mcu_fd_sc_mcu7t5v
 CELL_VERILOG_MODELS: ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/verilog/gf180mcu_fd_sc_mcu7t5v0.v", "pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/verilog/primitives.v", "dir::gf180mcu_as_ex_mcu7t5v0/verilog/gf180mcu_as_ex_mcu7t5v0.v"]
 CELL_SPICE_MODELS: ["pdk_dir::libs.ref/gf180mcu_fd_sc_mcu7t5v0/spice/gf180mcu_fd_sc_mcu7t5v0.spice", "dir::gf180mcu_as_ex_mcu7t5v0/cds/gf180mcu_as_ex_mcu7t5v0.spice"]
 
-EXTRA_EXCLUDED_CELLS: ["gf180mcu_fd_sc_mcu7t5v0__dff*", "*_1"]
+EXTRA_EXCLUDED_CELLS: ["gf180mcu_fd_sc_mcu7t5v0__dff*"]
 #End

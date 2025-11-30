@@ -1,7 +1,5 @@
 `default_nettype none
 
-//TODO: TEST THIS!
-
 module spi_dac_i(
 	input [11:0] sample_in_1,
 	input [11:0] sample_in_2,
@@ -14,7 +12,9 @@ module spi_dac_i(
 	output reg spi_dat_1 = 0,
 	output reg spi_dat_2 = 0,
 	output reg spi_csb = 1'b1,
-	input sample_ready
+	input sample_ready,
+	
+	input buffered
 );
 
 reg [15:0] spi_dat_buff_1 = 0;
@@ -47,8 +47,8 @@ always @(posedge clk) begin
 				spi_leb <= 1;
 				spi_csb <= 1;
 				if(sample_ready) counter <= 0;
-				spi_dat_buff_1 <= {4'b0111, sample_in_1};
-				spi_dat_buff_2 <= {4'b0111, sample_in_2};
+				spi_dat_buff_1 <= {buffered ? 4'b0111 : 4'b0011, sample_in_1};
+				spi_dat_buff_2 <= {buffered ? 4'b0111 : 4'b0011, sample_in_2};
 			end else begin
 				if(counter[0]) begin
 					//Clock in current bit

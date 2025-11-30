@@ -84,6 +84,11 @@ if { [info exists ::env(OPENLANE_SDC_IDEAL_CLOCKS)] && $::env(OPENLANE_SDC_IDEAL
     set_propagated_clock [all_clocks]
 }
 
-set_false_path -from [get_ports {design_sel_PAD[.*]}] -to [get_ports {design_sel.*}]
-set_false_path -from [get_ports {design_sel_PAD[.*]}] -to [get_pins {design_sel.*}]
-set_false_path -from [get_ports {design_sel_PAD[.*]}] -to [all_outputs]
+set_false_path -from [get_ports {design_sel_*}]
+set_false_path -from [get_pins {design_sel_*}]
+set_false_path -through [get_pins {design_sel_*}]
+set_false_path -through [get_pins {*pad/IE}]
+set_false_path -through [get_pins {*pad/OE}]
+set_false_path -through [get_pins {*pad/PU}]
+set_false_path -through [get_pins {*pad/PD}]
+set_false_path -through [get_pins {*pad/CS}]

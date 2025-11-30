@@ -1,17 +1,14 @@
 meta:
   version: 2
   flow: Classic
-  substituting_steps:
-    KLayout.DRC: null
-    Checker.KLayoutDRC: null
 
 # DO CHANGE
 DESIGN_NAME: sid
-VERILOG_FILES: ["dir::src/SID_channels.v", "dir::src/SID_filter.v", "dir::src/SID_top.v", "dir::src/spi_dac_i.v", "dir::src/wrapped_sid.v"]
-CLOCK_PERIOD: 50
-DIE_AREA: [0, 0, 925, 675]
+VERILOG_FILES: ["dir::src/SID_channels.v", "dir::src/SID_filter.v", "dir::src/SID_top.v", "dir::src/spi_dac_i.v", "dir::src/wrapped_sid.v", "dir::src/adc.v"]
+CLOCK_PERIOD: 60
+DIE_AREA: [0, 0, 550, 1000]
 RUN_MAGIC_DRC: true
-SYNTH_STRATEGY: AREA 2
+SYNTH_STRATEGY: AREA 1
 PL_RESIZER_SETUP_SLACK_MARGIN: 0.2
 GRT_RESIZER_SETUP_SLACK_MARGIN: 0.2
 GRT_RESIZER_HOLD_SLACK_MARGIN: 0.2

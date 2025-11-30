@@ -40,9 +40,7 @@ assign io_out[26:24] = 0;
 assign io_out[32] = bus_out[7];
 
 assign io_out[33] = 1'b0; //POT Y
-assign io_oe[1] = 1'b0;
 assign io_out[34] = 1'b0; //POT X
-assign io_oe[2] = 1'b0;
 
 assign io_out[27] = DAC_clk;
 assign io_out[28] = DAC_dat_1;
@@ -72,7 +70,14 @@ sid_top sid_top(
 	.bus_in({io_in_buffered[32], io_in_buffered[23], io_in_buffered[21:16]}),
 	.bus_out(bus_out),
 	.sample_raw_1(sample1),
-	.sample_raw_2(sample2)
+	.sample_raw_2(sample2),
+	.dac_buffered(io_in_buffered[40]),
+	.phi2(io_in_buffered[24]),
+	.phi2_en(!io_in_buffered[25]),
+	.pot_x_in(io_in_buffered[34]),
+	.pot_y_in(io_in_buffered[33]),
+	.pot_x_oe(io_oe[2]),
+	.pot_y_oe(io_oe[1])
 );
 
 endmodule

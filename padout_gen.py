@@ -110,6 +110,8 @@ with open('librelane/config.yaml', 'r') as file:
 			lef = macros[m]['lef']
 			if(not lef):
 				continue
+			if(not 'instances' in macros[m]):
+				continue
 			lef = lef[0]
 			lef = os.path.join('.', 'librelane', lef[5:])
 			with open(lef, 'r') as lef_file:

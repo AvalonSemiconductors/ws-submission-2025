@@ -1,9 +1,6 @@
 meta:
   version: 3
   flow: Classic
-  substituting_steps:
-    KLayout.DRC: null
-    Checker.KLayoutDRC: null
 
 # DO CHANGE
 DESIGN_NAME: gpiochip

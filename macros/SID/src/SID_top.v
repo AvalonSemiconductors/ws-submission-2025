@@ -10,14 +10,23 @@ module sid_top(
 	output DAC_dat_2,
 	output DAC_csb,
 	output oe,
+	input dac_buffered,
 	input [7:0] bus_in,
 	output [7:0] bus_out,
 
-	output [11:0] sample_raw_1,
-	output [11:0] sample_raw_2,
+	output reg [11:0] sample_raw_1,
+	output reg [11:0] sample_raw_2,
 	
 	input clk,
-	input rst_n
+	input rst_n,
+	
+	input phi2,
+	input phi2_en,
+	
+	input pot_x_in,
+	input pot_y_in,
+	output pot_x_oe,
+	output pot_y_oe
 );
 
 /*
@@ -49,6 +58,10 @@ reg [10:0] fc [1:0];
 reg [7:0]  res_filt [1:0];
 reg [7:0]  mode_vol [1:0];
 
+//Potentiometer inputs
+wire [7:0] measurement_x;
+wire [7:0] measurement_y;
+
 /*
  * Channel sample outputs
  */
@@ -63,14 +76,18 @@ wire [7:0] ch3_2_env;
 
 reg CEb;
 reg RWb;
+reg last_phi2;
 always @(posedge clk) begin
-	CEb <= CEb_in;
-	RWb <= RWb_in;
+	CEb <= rst_n ? CEb_in : 1'b1;
+	RWb <= rst_n ? RWb_in : 1'b1;
+	last_phi2 <= rst_n ? phi2 : 1'b0;
 end
 
 reg last_we;
 wire next_we = RWb || CEb;
 assign oe = (!CEb) && RWb;
+
+wire we_cond = phi2_en ? !CEb && !RWb && !phi2 && last_phi2 : last_we && !next_we;
 
 wire which = reg_addr[5];
 reg [7:0] read_res;
@@ -105,6 +122,8 @@ always @(*) begin
 		22: read_res = fc[which][10:3];
 		23: read_res = res_filt[which];
 		24: read_res = mode_vol[which];
+		25: read_res = measurement_x;
+		26: read_res = measurement_y;
 		27: read_res = which ? sample_2_3[11:4] : sample_1_3[11:4];
 		28: read_res = which ? ch3_2_env : ch3_1_env;
 	endcase
@@ -156,7 +175,7 @@ always @(posedge clk) begin
         last_we <= 1'b1;
     end else begin
 		last_we <= next_we;
-		if(last_we && !next_we) begin
+		if(we_cond) begin
                 /*
                 * SID Register Write
                 */
@@ -250,11 +269,17 @@ SID_channels channels_1(
     .ch3_env(ch3_2_env)
 );
 
+wire sample_ready_1;
+wire sample_ready_2;
 wire [14:0] full_sample_1;
 wire [14:0] full_sample_2;
-assign sample_raw_1 = full_sample_1[14:3];
-assign sample_raw_2 = full_sample_2[14:3];
-wire sample_ready;
+always @(posedge clk) begin
+    if(rst_n) begin
+        if(sample_ready_1) sample_raw_1 <= full_sample_1[14:3];
+        if(sample_ready_2) sample_raw_2 <= full_sample_2[14:3];
+    end
+end
+
 SID_filter filters_0(
     .sample_out(full_sample_1),
     .sample_1(sample_1_1),
@@ -266,7 +291,7 @@ SID_filter filters_0(
     .clk(clk),
     .rst(~rst_n),
     
-    .sample_ready(sample_ready)
+    .sample_ready(sample_ready_1)
 );
 
 SID_filter filters_1(
@@ -280,7 +305,7 @@ SID_filter filters_1(
     .clk(clk),
     .rst(~rst_n),
     
-    .sample_ready()
+    .sample_ready(sample_ready_2)
 );
 
 spi_dac_i spi_dac_i(
@@ -293,7 +318,24 @@ spi_dac_i spi_dac_i(
     .spi_dat_1(DAC_dat_1),
     .spi_dat_2(DAC_dat_2),
     .spi_csb(DAC_csb),
-    .sample_ready(sample_ready)
+    .sample_ready(1'b1),
+    .buffered(dac_buffered)
+);
+
+sid_adc sid_adc_x(
+    .rst_n(rst_n),
+    .clk(clk),
+    .pot_in(pot_x_in),
+    .pot_oe(pot_x_oe),
+    .measurement(measurement_x)
+);
+
+sid_adc sid_adc_y(
+    .rst_n(rst_n),
+    .clk(clk),
+    .pot_in(pot_y_in),
+    .pot_oe(pot_y_oe),
+    .measurement(measurement_y)
 );
 
 endmodule

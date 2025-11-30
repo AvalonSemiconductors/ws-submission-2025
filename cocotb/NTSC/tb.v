@@ -4,13 +4,16 @@
 module tb (
 	input clk,
 	input RESETn,
-	input color_enable
+	input color_enable,
+	output [11:0] ntsc_out
 );
 
 wire [41:0] iopads;
 assign iopads[41] = RESETn;
-assign iopads[40:37] = 3;
+assign iopads[40:37] = 6;
 assign iopads[36] = color_enable;
+assign ntsc_out = iopads[11:0];
+assign iopads[35] = 1'b0;
 
 `ifdef USE_POWER_PINS
 tri1 vddcore;

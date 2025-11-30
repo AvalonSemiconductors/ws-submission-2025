@@ -88,7 +88,7 @@ def main(input_layout, output_image, width, height, oversampling, pdk_root, pdk)
 
 if __name__ == "__main__":
 
-    pdk_root = os.getenv("PDK_ROOT", "gf180mcu")
+    pdk_root = os.getenv("PDK_ROOT", "gf180mcu_pdk")
     pdk = os.getenv("PDK", "gf180mcuD")
 
     parser = argparse.ArgumentParser(

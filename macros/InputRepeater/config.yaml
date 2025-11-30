@@ -2,8 +2,6 @@ meta:
   version: 3
   flow: Classic
   substituting_steps:
-    KLayout.DRC: null
-    Checker.KLayoutDRC: null
     OpenROAD.Resizertimingpostcts: null
     OpenROAD.CTS: null
     OpenROAD.RepairDesignPostGPL: null
@@ -28,3 +26,5 @@ FP_PDN_MULTILAYER: false
 FP_SIZING: absolute
 PNR_SDC_FILE: dir::base.sdc
 SIGNOFF_SDC_FILE: dir::base.sdc
+STD_CELL_LIBRARY: gf180mcu_fd_sc_mcu9t5v0
+OUTPUT_CAP_LOAD: 200

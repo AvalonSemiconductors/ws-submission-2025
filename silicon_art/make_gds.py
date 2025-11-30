@@ -17,7 +17,7 @@ def convert_to_gds(
     merge=False,
     smooth=False,
     pixel_size=6,
-    foreground="1/0",
+    foreground=["1/0"],
     boundaries=["0/0"],
     aggressive_fixes=False
 ):
@@ -32,8 +32,10 @@ def convert_to_gds(
     # Open the image
     img = Image.open(input_filepath).convert("RGBA")
 
-    layer, datatype = foreground.split('/')
-    foreground_layer = db.LayerInfo(int(layer), int(datatype))
+    foreground_layers = []
+    for l in foreground:
+        layer, datatype = l.split('/')
+        foreground_layers.append(db.LayerInfo(int(layer), int(datatype)))
 
     if not invert_alpha:
         # Create a white rgba background
@@ -93,7 +95,8 @@ def convert_to_gds(
         return res
     
     found = 1
-    #Iterate until all issues have been fixed
+    # Iterate until all issues have been fixed
+    # On a finitely-sized grid, this should always converge
     while(found != 0):
         found = 0
         for y in range(new_image_binary.height):
@@ -104,6 +107,7 @@ def convert_to_gds(
                 #   XO    OX
                 if(apply_kernel(x, y)):
                     found = found + 1
+                    print((x, y))
                     if((read_pixel(x, y) != 0) != invert):
                         if(try_set_pixel(x, y, False)):
                             try_set_pixel(x + 1, y + 1, True)
@@ -141,15 +145,17 @@ def convert_to_gds(
                     pixel_polygon = db.DPolygon(pixel)
                     top_region.insert(from_um * pixel_polygon)
                 else:
-                    top.shapes(foreground_layer).insert(pixel)
+                    for l in foreground_layers:
+                        top.shapes(l).insert(pixel)
 
     if merge:
         top_region.merge()
 
         if smooth:
             top_region = top_region.smoothed(from_um * pixel_size * 0.99)
-
-        top.shapes(foreground_layer).insert(top_region)
+        
+        for l in foreground_layers:
+            top.shapes(l).insert(top_region)
 
     # Add the boundaries
     for boundary in boundaries:
@@ -187,8 +193,9 @@ if __name__ == "__main__":
     parser.add_argument("--merge", action="store_true", help="merge polygons")
     parser.add_argument(
         "--foreground",
+        nargs="*",
         type=str,
-        help="gds layer/datatype pair for foreground pixels e.g. 0/0",
+        help="gds layer/datatype pairs for foreground pixels e.g. 0/0",
     )
     parser.add_argument(
         "--boundary",

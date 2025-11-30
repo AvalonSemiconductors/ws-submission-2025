@@ -11,3 +11,11 @@ cocotb/C64PLA/neatPLA/
 cocotb/*/sim_build/
 macros/AS65x/*/obj_dir/
 cocotb/6502/6502_65C02_functional_tests/
+samples*.raw
+macros/SID/Verilator/obj_dir/
+macros/NTSCTest/images/
+cocotb/NTSC/frame.png
+*.o
+*.elf
+*.bin
+cocotb/65RV32/C/*.txt

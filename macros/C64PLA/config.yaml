@@ -2,8 +2,6 @@ meta:
   version: 2
   flow: Classic
   substituting_steps:
-    KLayout.DRC: null
-    Checker.KLayoutDRC: null
     OpenROAD.Resizertimingpostcts: null
     OpenROAD.CTS: null
     OpenROAD.RepairDesignPostGPL: null

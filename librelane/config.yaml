@@ -2,10 +2,8 @@ meta:
   version: 3
   flow: Chip
   substituting_steps:
-    # Disable KLayout antenna check
     KLayout.Antenna: null
     Checker.KLayoutAntenna: null
-    
     OpenROAD.TapEndcapInsertion: null
     OpenROAD.RepairDesignPostGpl: null
     Odb.ManualGlobalPlacement: null
@@ -13,7 +11,6 @@ meta:
     OpenROAD.STAMidPnr-1: null
     OpenROAD.ResizerTimingPostCTS: null
     OpenROAD.STAMidPnr-2: null
-    OpenROAD.CheckAntennas: null
     Odb.DiodesOnPorts: null
     OpenROAD.RepairAntennas: null
     OpenROAD.STAMidPnr: null
@@ -23,6 +20,8 @@ meta:
 DESIGN_NAME: chip_top
 VERILOG_FILES:
 - dir::../src/chip_top.sv
+
+ROUTING_OBSTRUCTIONS: [["Metal4", 2450, 3850, 3145, 4427], ["Metal5", 2450, 3850, 3145, 4427]]
 
 # Enable plugin for better SystemVerilog support
 # USE_SLANG: True
@@ -135,13 +134,14 @@ IGNORE_DISCONNECTED_MODULES:
 - gf180mcu_fd_io__asig_5p0_fixed
 - avali_logo
 - aef2
+- tholin
 - gf180mcu_ws_ip__id
 - gf180mcu_ws_ip__logo
 
 # Clock
 CLOCK_PORT: clk_PAD
 CLOCK_NET: clk_pad/Y
-CLOCK_PERIOD: 200 # Top-level timing analysis is irrelevant for setup times as the individual projects each have their own clock period
+CLOCK_PERIOD: 150 # Top-level timing analysis is irrelevant for setup times as the individual projects each have their own clock period
 
 # Floorplanning
 FP_SIZING: absolute
@@ -171,7 +171,6 @@ PDN_CORE_RING_CONNECT_TO_PADS: True
 PDN_ENABLE_PINS: True
 PDN_CORE_VERTICAL_LAYER: Metal2
 PDN_CORE_HORIZONTAL_LAYER: Metal3
-PDN_MACRO_CONNECTIONS: ["multiplexer VDD VSS VDD VSS", "as65x VDD VSS VDD VSS", "c64pla VDD VSS VDD VSS", "sid VDD VSS VDD VSS", "repeater VDD VSS VDD VSS", "gpiochip VDD VSS VDD VSS", "dram_controller VDD VSS VDD VSS", "dac0 VDD VSS VDD VSS", "dac1 VDD VSS VDD VSS", "dac2 VDD VSS VDD VSS", "ntsc VDD VSS VDD VSS", "dac3 VDD VSS VDD VSS"]
 
 # Due to OpenROAD bug
 # https://github.com/The-OpenROAD-Project/OpenROAD/issues/8229
@@ -248,7 +247,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/Multiplexer/runs/latest/final/lib/nom_tt_025C_5v00/multiplexer__nom_tt_025C_5v00.lib
     instances:
       multiplexer:
-        location: [1800, 3000]
+        location: [1475, 2950]
         orientation: N
   as65x:
     gds:
@@ -275,7 +274,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/AS65x/runs/latest/final/lib/nom_tt_025C_5v00/as65x__nom_tt_025C_5v00.lib
     instances:
       as65x:
-        location: [1000, 1200]
+        location: [700, 3000]
         orientation: N
   c64pla:
     gds:
@@ -302,7 +301,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/C64PLA/runs/latest/final/lib/nom_tt_025C_5v00/c64pla__nom_tt_025C_5v00.lib
     instances:
       c64pla:
-        location: [1050, 1750]
+        location: [1100, 4250]
         orientation: N
   sid:
     gds:
@@ -329,7 +328,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/SID/runs/latest/final/lib/nom_tt_025C_5v00/sid__nom_tt_025C_5v00.lib
     instances:
       sid:
-        location: [1600, 800]
+        location: [2700, 1500]
         orientation: N
   repeater:
     gds:
@@ -356,7 +355,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/InputRepeater/runs/latest/final/lib/nom_tt_025C_5v00/repeater__nom_tt_025C_5v00.lib
     instances:
       repeater:
-        location: [1800, 2700]
+        location: [2800, 2700]
         orientation: N
   gpiochip:
     gds:
@@ -383,7 +382,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/GPIO/runs/latest/final/lib/nom_tt_025C_5v00/gpiochip__nom_tt_025C_5v00.lib
     instances:
       gpiochip:
-        location: [1800, 1550]
+        location: [650, 2100]
         orientation: N
   dram_controller:
     gds:
@@ -410,7 +409,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/DRAMController/runs/latest/final/lib/nom_tt_025C_5v00/dram_controller__nom_tt_025C_5v00.lib
     instances:
       dram_controller:
-        location: [900, 900]
+        location: [2700, 3200]
         orientation: N
   ntsc:
     gds:
@@ -437,7 +436,88 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/NTSCTest/runs/latest/final/lib/nom_tt_025C_5v00/ntsc__nom_tt_025C_5v00.lib
     instances:
       ntsc:
-        location: [2600, 1450]
+        location: [650, 700]
+        orientation: N
+  misc:
+    gds:
+      - dir::../macros/MiscStuff/runs/latest/final/gds/misc.gds
+    lef:
+      - dir::../macros/MiscStuff/runs/latest/final/lef/misc.lef
+    pnl:
+      - dir::../macros/MiscStuff/runs/latest/final/pnl/misc.pnl.v
+    nl:
+      - dir::../macros/MiscStuff/runs/latest/final/nl/misc.nl.v
+    spef:
+      min_*: dir::../macros/MiscStuff/runs/latest/final/spef/min/misc.min.spef
+      nom_*: dir::../macros/MiscStuff/runs/latest/final/spef/nom/misc.nom.spef
+      max_*: dir::../macros/MiscStuff/runs/latest/final/spef/max/misc.max.spef
+    lib:
+      max_ff_n40C_5v50: dir::../macros/MiscStuff/runs/latest/final/lib/max_ff_n40C_5v50/misc__max_ff_n40C_5v50.lib
+      max_ss_125C_4v50: dir::../macros/MiscStuff/runs/latest/final/lib/max_ss_125C_4v50/misc__max_ss_125C_4v50.lib
+      max_tt_025C_5v00: dir::../macros/MiscStuff/runs/latest/final/lib/max_tt_025C_5v00/misc__max_tt_025C_5v00.lib
+      min_ff_n40C_5v50: dir::../macros/MiscStuff/runs/latest/final/lib/min_ff_n40C_5v50/misc__min_ff_n40C_5v50.lib
+      min_ss_125C_4v50: dir::../macros/MiscStuff/runs/latest/final/lib/min_ss_125C_4v50/misc__min_ss_125C_4v50.lib
+      min_tt_025C_5v00: dir::../macros/MiscStuff/runs/latest/final/lib/min_tt_025C_5v00/misc__min_tt_025C_5v00.lib
+      nom_ff_n40C_5v50: dir::../macros/MiscStuff/runs/latest/final/lib/nom_ff_n40C_5v50/misc__nom_ff_n40C_5v50.lib
+      nom_ss_125C_4v50: dir::../macros/MiscStuff/runs/latest/final/lib/nom_ss_125C_4v50/misc__nom_ss_125C_4v50.lib
+      nom_tt_025C_5v00: dir::../macros/MiscStuff/runs/latest/final/lib/nom_tt_025C_5v00/misc__nom_tt_025C_5v00.lib
+    instances:
+      misc:
+        location: [1150, 1900]
+        orientation: N
+  as65rv32:
+    gds:
+      - dir::../macros/65RV32/runs/latest/final/gds/as65rv32.gds
+    lef:
+      - dir::../macros/65RV32/runs/latest/final/lef/as65rv32.lef
+    pnl:
+      - dir::../macros/65RV32/runs/latest/final/pnl/as65rv32.pnl.v
+    nl:
+      - dir::../macros/65RV32/runs/latest/final/nl/as65rv32.nl.v
+    spef:
+      min_*: dir::../macros/65RV32/runs/latest/final/spef/min/as65rv32.min.spef
+      nom_*: dir::../macros/65RV32/runs/latest/final/spef/nom/as65rv32.nom.spef
+      max_*: dir::../macros/65RV32/runs/latest/final/spef/max/as65rv32.max.spef
+    lib:
+      max_ff_n40C_5v50: dir::../macros/65RV32/runs/latest/final/lib/max_ff_n40C_5v50/as65rv32__max_ff_n40C_5v50.lib
+      max_ss_125C_4v50: dir::../macros/65RV32/runs/latest/final/lib/max_ss_125C_4v50/as65rv32__max_ss_125C_4v50.lib
+      max_tt_025C_5v00: dir::../macros/65RV32/runs/latest/final/lib/max_tt_025C_5v00/as65rv32__max_tt_025C_5v00.lib
+      min_ff_n40C_5v50: dir::../macros/65RV32/runs/latest/final/lib/min_ff_n40C_5v50/as65rv32__min_ff_n40C_5v50.lib
+      min_ss_125C_4v50: dir::../macros/65RV32/runs/latest/final/lib/min_ss_125C_4v50/as65rv32__min_ss_125C_4v50.lib
+      min_tt_025C_5v00: dir::../macros/65RV32/runs/latest/final/lib/min_tt_025C_5v00/as65rv32__min_tt_025C_5v00.lib
+      nom_ff_n40C_5v50: dir::../macros/65RV32/runs/latest/final/lib/nom_ff_n40C_5v50/as65rv32__nom_ff_n40C_5v50.lib
+      nom_ss_125C_4v50: dir::../macros/65RV32/runs/latest/final/lib/nom_ss_125C_4v50/as65rv32__nom_ss_125C_4v50.lib
+      nom_tt_025C_5v00: dir::../macros/65RV32/runs/latest/final/lib/nom_tt_025C_5v00/as65rv32__nom_tt_025C_5v00.lib
+    instances:
+      as65rv32:
+        location: [1700, 1900]
+        orientation: N
+  fm:
+    gds:
+      - dir::../macros/FMSynth/runs/latest/final/gds/fm.gds
+    lef:
+      - dir::../macros/FMSynth/runs/latest/final/lef/fm.lef
+    pnl:
+      - dir::../macros/FMSynth/runs/latest/final/pnl/fm.pnl.v
+    nl:
+      - dir::../macros/FMSynth/runs/latest/final/nl/fm.nl.v
+    spef:
+      min_*: dir::../macros/FMSynth/runs/latest/final/spef/min/fm.min.spef
+      nom_*: dir::../macros/FMSynth/runs/latest/final/spef/nom/fm.nom.spef
+      max_*: dir::../macros/FMSynth/runs/latest/final/spef/max/fm.max.spef
+    lib:
+      max_ff_n40C_5v50: dir::../macros/FMSynth/runs/latest/final/lib/max_ff_n40C_5v50/fm__max_ff_n40C_5v50.lib
+      max_ss_125C_4v50: dir::../macros/FMSynth/runs/latest/final/lib/max_ss_125C_4v50/fm__max_ss_125C_4v50.lib
+      max_tt_025C_5v00: dir::../macros/FMSynth/runs/latest/final/lib/max_tt_025C_5v00/fm__max_tt_025C_5v00.lib
+      min_ff_n40C_5v50: dir::../macros/FMSynth/runs/latest/final/lib/min_ff_n40C_5v50/fm__min_ff_n40C_5v50.lib
+      min_ss_125C_4v50: dir::../macros/FMSynth/runs/latest/final/lib/min_ss_125C_4v50/fm__min_ss_125C_4v50.lib
+      min_tt_025C_5v00: dir::../macros/FMSynth/runs/latest/final/lib/min_tt_025C_5v00/fm__min_tt_025C_5v00.lib
+      nom_ff_n40C_5v50: dir::../macros/FMSynth/runs/latest/final/lib/nom_ff_n40C_5v50/fm__nom_ff_n40C_5v50.lib
+      nom_ss_125C_4v50: dir::../macros/FMSynth/runs/latest/final/lib/nom_ss_125C_4v50/fm__nom_ss_125C_4v50.lib
+      nom_tt_025C_5v00: dir::../macros/FMSynth/runs/latest/final/lib/nom_tt_025C_5v00/fm__nom_tt_025C_5v00.lib
+    instances:
+      fm:
+        location: [1475, 3900]
         orientation: N
   r2r_dac_buffered:
     gds:
@@ -451,16 +531,34 @@ MACROS:
         - dir::../macros/Analog/R2R_DAC/lib/r2r_dac_buffered.lib
     instances:
       dac0:
-        location: [2575, 1200]
+        location: [2550, 1200]
         orientation: N
       dac1:
         location: [2925, 1200]
         orientation: N
       dac2:
-        location: [2575, 1050]
+        location: [2550, 1050]
         orientation: N
       dac3:
         location: [2925, 1050]
+        orientation: N
+      dac4:
+        location: [2550, 900]
+        orientation: N
+      dac5:
+        location: [2925, 900]
+        orientation: N
+      dac6:
+        location: [2550, 750]
+        orientation: N
+      dac7:
+        location: [2925, 750]
+        orientation: N
+      dac8:
+        location: [2550, 600]
+        orientation: N
+      dac9:
+        location: [2925, 600]
         orientation: N
   gf180mcu_fd_io__asig_5p0_fixed:
     gds:
@@ -527,7 +625,21 @@ MACROS:
         - dir::../silicon_art/aef2.lib
     instances:
       aef2:
-        location: [910, 3900]
+        location: [1000, 3900]
+        orientation: N
+  tholin:
+    gds:
+      - dir::../silicon_art/tholin.gds
+    lef:
+      - dir::../silicon_art/tholin.lef
+    vh:
+      - dir::../silicon_art/tholin.v
+    lib:
+      "*":
+        - dir::../silicon_art/tholin.lib
+    instances:
+      tholin:
+        location: [2450, 3900]
         orientation: N
 
 FP_MACRO_HORIZONTAL_HALO: 5
@@ -540,6 +652,7 @@ LVS_FLATTEN_CELLS:
 - gf180mcu_ws_ip__logo
 - avali_logo
 - aef2
+- tholin
 
 # gf180mcu_ws_ip__id has no ports and components
 # therefore make it an abstract cell in the layout
@@ -548,3 +661,4 @@ MAGIC_EXT_ABSTRACT_CELLS:
 - gf180mcu_ws_ip__logo
 - avali_logo
 - aef2
+- tholin

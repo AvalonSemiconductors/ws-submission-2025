@@ -93,13 +93,10 @@ if { [info exists ::env(OPENLANE_SDC_IDEAL_CLOCKS)] && $::env(OPENLANE_SDC_IDEAL
 
 set_input_delay -min 1 -clock $clocks [get_port rst_override_n]
 set_input_delay -max 4 -clock $clocks [get_port rst_override_n]
-set_input_delay -min 1 -clock $clocks [get_port select_6502]
-set_input_delay -max 4 -clock $clocks [get_port select_6502]
 
 set_input_delay -min 1 -clock $clocks [get_ports {io_in_buffered[*]}]
 set_input_delay -min 1 -clock $clocks [get_ports {design_sel_buffered[*]}]
-set_input_delay -max 4 -clock $clocks [get_ports {io_in_buffered[*]}]
-set_input_delay -max 4 -clock $clocks [get_ports {design_sel_buffered[*]}]
+set_input_delay -max 2.1 -clock $clocks [get_ports {io_in_buffered[*]}]
+set_input_delay -max 2.1 -clock $clocks [get_ports {design_sel_buffered[*]}]
 
-set_false_path -from [get_port rst_override_n] -to [get_pins {*/D}]
-set_false_path -from [get_port rst_override_n] -to [all_outputs]
+set_false_path -from [get_port rst_override_n]

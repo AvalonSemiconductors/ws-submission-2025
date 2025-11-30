@@ -85,4 +85,5 @@ if { [info exists ::env(OPENLANE_SDC_IDEAL_CLOCKS)] && $::env(OPENLANE_SDC_IDEAL
     set_propagated_clock [all_clocks]
 }
 
-set_false_path -from [get_ports {design_sel[*]}] -to [all_outputs]
+set_false_path -from [get_pins {design_sel[*]}] -to [all_outputs]
+

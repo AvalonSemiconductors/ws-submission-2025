@@ -2,8 +2,6 @@ meta:
   version: 2
   flow: Classic
   substituting_steps:
-    KLayout.DRC: null
-    Checker.KLayoutDRC: null
     OpenROAD.Resizertimingpostcts: null
     OpenROAD.CTS: null
     OpenROAD.RepairDesignPostGPL: null
@@ -12,16 +10,15 @@ meta:
 # DO CHANGE
 DESIGN_NAME: multiplexer
 VERILOG_FILES: dir::src/mux.v
-CLOCK_PERIOD: 20
-DIE_AREA: [0, 0, 600, 600]
+CLOCK_PERIOD: 23
+DIE_AREA: [0, 0, 850, 800]
 RUN_MAGIC_DRC: true
 SYNTH_STRATEGY: DELAY 4
 PL_RESIZER_SETUP_SLACK_MARGIN: 0
 GRT_RESIZER_SETUP_SLACK_MARGIN: 0
 GRT_RESIZER_HOLD_SLACK_MARGIN: 0
 PL_RESIZER_HOLD_SLACK_MARGIN: 0
-MAX_FANOUT_CONSTRAINT: 4
-MAX_TRANSITION_CONSTRAINT: 0.7
+MAX_FANOUT_CONSTRAINT: 7
 CLOCK_PORT: clk_i
 CLOCK_NET: clk_i
 VDD_NETS: ["VDD"]
@@ -31,3 +28,4 @@ RT_MAX_LAYER: Metal4
 FP_PIN_ORDER_CFG: dir::pin_order.cfg
 FP_PDN_MULTILAYER: false
 FP_SIZING: absolute
+STD_CELL_LIBRARY: gf180mcu_fd_sc_mcu9t5v0

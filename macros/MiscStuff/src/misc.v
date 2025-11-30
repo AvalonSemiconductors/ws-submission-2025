@@ -32,7 +32,7 @@ tt_um_rejunity_vga_logo vga0(
 	.uio_oe(),
 	.ena(1'b1),
 	.clk(clk_i),
-	.rst_n(design_sel_buffered == 1 && rst_override_n)
+	.rst_n(design_sel_buffered == 1 && rst_override_n && io_in[0])
 );
 
 wire [7:0] vga1_out;
@@ -44,13 +44,13 @@ tt_um_waferspace_vga_screensaver vga1(
 	.uio_oe(),
 	.ena(1'b1),
 	.clk(clk_i),
-	.rst_n(design_sel_buffered == 2 && rst_override_n)
+	.rst_n(design_sel_buffered == 2 && rst_override_n && io_in[0])
 );
 
 wire io_out_hellorld;
 hellorld hellorld(
 	.wb_clk_i(clk_i),
-	.rst_n(design_sel_buffered == 3 && rst_override_n),
+	.rst_n(design_sel_buffered == 3 && rst_override_n && io_in[0]),
 	.io_out(io_out_hellorld),
 	.custom_settings(1040)
 );
@@ -58,7 +58,7 @@ hellorld hellorld(
 wire [8:0] io_out_diceroll;
 diceroll diceroll(
 	.wb_clk_i(clk_i),
-	.rst_n(design_sel_buffered == 3 && rst_override_n),
+	.rst_n(design_sel_buffered == 3 && rst_override_n && io_in[0]),
 	.io_in(io_in[41]),
 	.io_out(io_out_diceroll)
 );
@@ -67,7 +67,7 @@ wire [2:0] wire_out_blinker;
 blinker blinker(
 	.clk_i(clk_i),
 	.io_out(wire_out_blinker),
-	.rst_n(design_sel_buffered == 3 && rst_override_n)
+	.rst_n(design_sel_buffered == 3 && rst_override_n && io_in[0])
 );
 
 wire [10:0] nano_PA;
@@ -94,16 +94,58 @@ nano nano(
 	.D_out(nano_DO),
 	.D_oe(nano_oe),
 	.PSG(nano_PSG),
-	.rst(design_sel_buffered != 4 || !rst_override_n)
+	.rst(design_sel_buffered != 4 || !rst_override_n || !io_in[0])
+);
+
+wire [16:0] mc_io_out;
+mc mc(
+	.clk_i(clk_i),
+	.rst_n(design_sel_buffered == 6 && rst_override_n && io_in[0]),
+	.loader_en(io_in[0]),
+	.run(io_in[9]),
+	.load(io_in[10]),
+	.preload_en(io_in[11]),
+	.port_in(io_in[27:20]),
+	.port_out(mc_io_out[7:0]),
+	.load_in(io_in[19:12]),
+	.preload_addr(mc_io_out[15:8]),
+	.preload_act_n(mc_io_out[16])
 );
 
 //TODO: test this
-wire [1:0] vga_col_sel_r = 2'b11 - (design_sel_buffered == 1 ? {vga0_out[0], vga0_out[4]} : (design_sel_buffered == 2 ? {vga1_out[0], vga1_out[4]} : 2'b00));
-wire [1:0] vga_col_sel_g = 2'b11 - (design_sel_buffered == 1 ? {vga0_out[1], vga0_out[5]} : (design_sel_buffered == 2 ? {vga1_out[1], vga1_out[5]} : 2'b00));
-wire [1:0] vga_col_sel_b = 2'b11 - (design_sel_buffered == 1 ? {vga0_out[2], vga0_out[6]} : (design_sel_buffered == 2 ? {vga1_out[2], vga1_out[6]} : 2'b00));
-assign sample_raw_1 = {6{vga_col_sel_r}};
-assign sample_raw_2 = {6{vga_col_sel_g}};
-assign sample_raw_3 = {6{vga_col_sel_b}};
+reg [7:0] vga_col_sel_r;
+reg [7:0] vga_col_sel_g;
+reg [7:0] vga_col_sel_b;
+always @(*) begin
+	case(design_sel_buffered)
+		default: begin
+			vga_col_sel_r = 0;
+			vga_col_sel_g = 0;
+			vga_col_sel_b = 0;
+		end
+		1: begin
+			vga_col_sel_r = {4{vga0_out[0], vga0_out[4]}};
+			vga_col_sel_g = {4{vga0_out[1], vga0_out[5]}};
+			vga_col_sel_b = {4{vga0_out[2], vga0_out[6]}};
+		end
+		2: begin
+			vga_col_sel_r = {4{vga1_out[0], vga1_out[4]}};
+			vga_col_sel_g = {4{vga1_out[1], vga1_out[5]}};
+			vga_col_sel_b = {4{vga1_out[2], vga1_out[6]}};
+		end
+		5: begin
+			vga_col_sel_r = 8'hFF;
+			vga_col_sel_g = 8'hFF;
+			vga_col_sel_b = 8'hFF;
+		end
+	endcase
+end
+wire [7:0] vga_col_r_inv = 8'hFF - vga_col_sel_r;
+wire [7:0] vga_col_g_inv = 8'hFF - vga_col_sel_g;
+wire [7:0] vga_col_b_inv = 8'hFF - vga_col_sel_b;
+assign sample_raw_1 = {vga_col_r_inv, vga_col_r_inv[7:4]};
+assign sample_raw_2 = {vga_col_g_inv, vga_col_g_inv[7:4]};
+assign sample_raw_3 = {vga_col_b_inv, vga_col_b_inv[7:4]};
 
 reg [41:0] io_out_sel;
 assign io_out = io_out_sel;
@@ -121,33 +163,47 @@ always @(*) begin
 			io_out_sel = {8'h00, vga0_out, 26'h0};
 			io_oe_sel = {8'h00, 8'hFF, 26'h0};
 			io_pu_sel = 0;
-			io_pd_sel = 0;
-			io_cs_sel = 0;
+			io_pd_sel = 1;
+			io_cs_sel = 1;
 		end
 		2: begin
 			io_out_sel = {8'h00, vga1_out, 26'h0};
 			io_oe_sel = {8'h00, 8'hFF, 26'h0};
 			io_pu_sel = 0;
-			io_pd_sel = {8'h00, 8'hFF, 26'h0};
-			io_cs_sel = {8'h00, 8'hFF, 26'h0};
+			io_pd_sel = {8'h00, 8'hFF, 25'h0, 1'b1};
+			io_cs_sel = {8'h00, 8'hFF, 25'h0, 1'b1};
 		end
 		3: begin
-			io_out_sel = {1'b0, io_out_diceroll, {29{io_out_hellorld}}, wire_out_blinker};
-			io_oe_sel = {1'b0, 9'h1F, 32'hFFFFFFFF};
+			io_out_sel = {1'b0, io_out_diceroll, {28{io_out_hellorld}}, wire_out_blinker, 1'b0};
+			io_oe_sel = {1'b0, 9'h1F, 31'h7FFFFFFF, 1'b0};
 			io_pu_sel = 0;
-			io_pd_sel = {1'b1, 41'h0};
-			io_cs_sel = {1'b1, 41'h0};
+			io_pd_sel = {1'b1, 40'h0, 1'b1};
+			io_cs_sel = {1'b1, 40'h0, 1'b1};
 		end
 		4: begin
-			io_out_sel = {nano_PA, nano_DO, nano_RW, nano_DS, nano_PSG, nano_int_ena, nano_int_ack, 1'b0, 7'h00, 7'hxx};
-			io_oe_sel = {11'h7FF, {8{nano_oe}}, 1'b1, 4'hF, 1'b1, 1'b1, 1'b1, 1'b0, ~nano_DC, 7'h7F};
+			io_out_sel = {nano_PA, nano_DO, nano_RW, nano_DS, nano_PSG, nano_int_ena, nano_int_ack, 1'b0, 7'h00, 6'hxx, 1'b0};
+			io_oe_sel = {11'h7FF, {8{nano_oe}}, 1'b1, 4'hF, 1'b1, 1'b1, 1'b1, 1'b0, ~nano_DC, 6'h3F, 1'b0};
 			io_pu_sel = 0;
-			io_pd_sel = {27'h0, 1'b1, 14'h0};
-			io_cs_sel = {27'h0, 1'b1, 14'h0};
+			io_pd_sel = {27'h0, 1'b1, 13'h0, 1'b1};
+			io_cs_sel = {27'h0, 1'b1, 13'h0, 1'b1};
+		end
+		5: begin
+			io_out_sel = {8'h00, 8'hAA, 26'h0};
+			io_oe_sel = {8'h00, 8'hFF, 26'h0};
+			io_pu_sel = 0;
+			io_pd_sel = {8'h00, 8'hFF, 25'h0, 1'b1};
+			io_cs_sel = {8'h00, 8'hFF, 25'h0, 1'b1};
+		end
+		6: begin
+			io_out_sel = {5'h0, mc_io_out[16:8], 19'h0, mc_io_out[7:0], 1'b0};
+			io_oe_sel = {5'h0, 9'h1FF, 19'h0, 8'hFF, 1'b0};
+			io_pu_sel = 0;
+			io_pd_sel = {5'h1F, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
+			io_cs_sel = {5'h1F, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
 		end
 		default: begin
 			io_out_sel = 0;
-			io_oe_sel = 0;
+			io_oe_sel = 42'h3FFFFFFFFFF;
 			io_pu_sel = 0;
 			io_pd_sel = 0;
 			io_cs_sel = 0;

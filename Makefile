@@ -5,7 +5,7 @@ TOP = chip_top
 
 PDK_ROOT ?= $(MAKEFILE_DIR)/gf180mcu_pdk
 PDK ?= gf180mcuD
-PDK_TAG ?= 1.1.0
+PDK_TAG ?= 1.1.2
 
 .DEFAULT_GOAL := help
 
@@ -62,10 +62,10 @@ sim-view: ## View simulation waveforms in GTKWave
 
 copy-final: ## Copy final output files from the last run
 	rm -rf final/
-	cp -r librelane/runs/${RUN_TAG}/final/ final/
+	mv librelane/runs/${RUN_TAG}/final/ final/
 .PHONY: copy-final
 
 render-image: ## Render an image from the final layout (after copy-final)
 	mkdir -p img/
-	PDK_ROOT=${PDK_ROOT} PDK=${PDK} python3 scripts/lay2img.py final/gds/${TOP}.gds img/${TOP}.png --width 2048 --oversampling 4
+	PDK_ROOT=${PDK_ROOT} PDK=${PDK} python3 scripts/lay2img.py final/gds/${TOP}.gds img/${TOP}.png --width 8192 --oversampling 4
 .PHONY: copy-final
