@@ -26,6 +26,8 @@
 `include "../../macros/MiscStuff/src/hellorld.v"
 `include "../../macros/MiscStuff/src/misc.v"
 `include "../../macros/MiscStuff/src/nano.v"
+`include "../../macros/MiscStuff/src/mc.v"
+`include "../../macros/MiscStuff/src/vga_demo.v"
 `include "../../macros/MiscStuff/src/external/ttgf-vga-tiny-tapeout-animated-logo/src/hvsync_generator.v"
 `include "../../macros/MiscStuff/src/external/ttgf-vga-tiny-tapeout-animated-logo/src/project.v"
 `include "../../macros/MiscStuff/src/external/tt-waferspace-vga-screensaver/src/bitmap_rom.v"

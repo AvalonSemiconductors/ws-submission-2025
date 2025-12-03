@@ -22,6 +22,30 @@ __attribute__((always_inline)) inline void write_csr(const unsigned int csr_num,
 	else asm volatile("csrw %1, %0" : : "r"(value), "I"(csr_num));
 }
 
+void nmiisr() {
+	*((volatile uint8_t*)0xFFFF) = 'N';
+	*((volatile uint8_t*)0xFFFF) = 'M';
+	*((volatile uint8_t*)0xFFFF) = 'I';
+	*((volatile uint8_t*)0xFFFF) = '!';
+}
+
+void intisr() {
+	uint32_t mcause = read_csr(0x342);
+	if((mcause & 0x7) == 0x2) {
+		*((volatile uint8_t*)0xFFFF) = 'T';
+		*((volatile uint8_t*)0xFFFF) = 'M';
+		*((volatile uint8_t*)0xFFFF) = 'R';
+		*((volatile uint8_t*)0xFFFF) = '!';
+	}else {
+		*((volatile uint8_t*)0xFFFF) = 'I';
+		*((volatile uint8_t*)0xFFFF) = 'N';
+		*((volatile uint8_t*)0xFFFF) = 'T';
+		*((volatile uint8_t*)0xFFFF) = '!';
+		*((volatile uint8_t*)0xFFFF) = '\r';
+		*((volatile uint8_t*)0xFFFF) = '\n';
+	}
+}
+
 int putchar(int c) {
 	volatile uint32_t a = 1;
 	while(1) {

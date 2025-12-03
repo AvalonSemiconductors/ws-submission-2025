@@ -31,6 +31,9 @@ wire [7:0] D_o;
 wire D_oe;
 wire TXD;
 wire uart_reloc;
+wire ALE;
+wire bus_extend;
+wire reset_ALE;
 
 wire [7:0] D_i_6502 = {
 	io_in[33],
@@ -53,7 +56,7 @@ wire [7:0] PORT_read = (DDR & PORT) | ((~DDR) & {
 	io_in[34],
 	io_in[35]
 });
-wire [7:0] D_i_6510 = A_o == 0 ? DDR : (A_o == 1 ? PORT_read : {
+wire [7:0] D_i_6510 = {
 	io_in[36],
 	io_in[37],
 	io_in[38],
@@ -62,7 +65,7 @@ wire [7:0] D_i_6510 = A_o == 0 ? DDR : (A_o == 1 ? PORT_read : {
 	io_in[41],
 	io_in[0],
 	io_in[1]
-});
+};
 
 wire [41:0] io_out_6502 = {
 	RWn,
@@ -95,7 +98,7 @@ wire [41:0] io_out_6502 = {
 	1'b0,
 	SYNC,
 	1'b1, //NMIn
-	VPn,
+	ALE,
 	1'b1, //IRQn
 	uart_reloc ? TXD : PH1OUT,
 	1'b1, //RDY
@@ -143,7 +146,7 @@ wire [41:0] io_out_6510 = {
 	D_o[5],
 	D_o[6],
 	D_o[7],
-	PORT[0],
+	PORT[0] | reset_ALE,
 	PORT[1],
 	PORT[2],
 	PORT[3],
@@ -183,7 +186,7 @@ wire [41:0] io_out_6510 = {
 
 wire [41:0] oe_6510 = {
 	{6{D_oe}},
-	DDR[0],
+	DDR[0] | reset_ALE,
 	DDR[1],
 	DDR[2],
 	DDR[3],
@@ -242,7 +245,10 @@ cpurv32 cpu(
 	.port_in(PORT_read),
 	.TXD(TXD),
 	.RXD((uart_reloc ? (select_6502 ? io_in[5] : io_in[30]) : (select_6502 ? io_in[14] : io_in[8])) | !rst_n),
-	.uart_reloc(uart_reloc)
+	.uart_reloc(uart_reloc),
+	.ALE(ALE),
+	.bus_extend(bus_extend),
+	.reset_ALE(reset_ALE)
 );
 
 endmodule

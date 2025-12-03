@@ -14,3 +14,5 @@
 `include "../../macros/NTSCTest/runs/latest/final/pnl/ntsc.pnl.v"
 `include "../../macros/FMSynth/runs/latest/final/pnl/fm.pnl.v"
 `include "../../macros/65RV32/runs/latest/final/pnl/as65rv32.pnl.v"
+`include "../../macros/Analog/AnalogPad/verilog/gf180mcu_fd_io.v"
+`include "../../macros/MiscStuff/gf180mcu_as_ex_mcu7t5v0/verilog/gf180mcu_as_ex_mcu7t5v0.v"

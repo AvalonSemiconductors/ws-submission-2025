@@ -13,7 +13,8 @@ module fm(
 	
 	output [11:0] sample_raw_1,
 	output [11:0] sample_raw_2,
-	output [11:0] sample_raw_3
+	output [11:0] sample_raw_3,
+	output [11:0] sample_raw_4
 );
 
 wire [7:0] bus_out;
@@ -43,9 +44,11 @@ assign io_out[41:35] = 0;
 wire [11:0] sample1;
 wire [11:0] sample2;
 wire [11:0] sample3;
+wire [11:0] sample4;
 assign sample_raw_1 = 12'hFFF - (rst_override_n ? sample1 : 12'hFFF);
 assign sample_raw_2 = 12'hFFF - (rst_override_n ? sample2 : 12'hFFF);
 assign sample_raw_3 = 12'hFFF - (rst_override_n ? sample3 : 12'hFFF);
+assign sample_raw_4 = 12'hFFF - (rst_override_n ? sample4 : 12'hFFF);
 
 fm_top fm_top(
 	.clk(clk_i),
@@ -59,6 +62,7 @@ fm_top fm_top(
 	.sample_raw_1(sample1),
 	.sample_raw_2(sample2),
 	.sample_raw_3(sample3),
+	.sample_raw_4(sample4),
 	.pot_x_in(io_in_buffered[34]),
 	.pot_y_in(io_in_buffered[33]),
 	.pot_x_oe(io_oe[2]),

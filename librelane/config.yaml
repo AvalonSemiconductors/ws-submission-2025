@@ -16,12 +16,25 @@ meta:
     OpenROAD.STAMidPnr: null
     OpenROAD.CheckAntennas: null
     OpenROAD.FillInsertion: null
+    KLayout.DRC: null
+    Checker.KLayoutDRC: null
 
 DESIGN_NAME: chip_top
 VERILOG_FILES:
 - dir::../src/chip_top.sv
 
-ROUTING_OBSTRUCTIONS: [["Metal4", 2450, 3850, 3145, 4427], ["Metal5", 2450, 3850, 3145, 4427]]
+ROUTING_OBSTRUCTIONS: [["Metal4", 2450, 3850, 3145, 4427], ["Metal5", 2450, 3850, 3145, 4427],
+["Metal1", 2400, 2900, 3440, 3780],
+["Metal2", 2400, 2900, 3440, 3780],
+["Metal3", 2400, 2900, 3440, 3780],
+["Metal4", 2400, 2900, 3440, 3780],
+["Metal5", 2400, 2900, 3440, 3780],
+["Metal1", 500, 2900, 1475, 3725],
+["Metal2", 500, 2900, 1475, 3725],
+["Metal3", 500, 2900, 1475, 3725],
+["Metal4", 500, 2900, 1475, 3725],
+["Metal5", 500, 2900, 1475, 3725]
+]
 
 # Enable plugin for better SystemVerilog support
 # USE_SLANG: True
@@ -135,6 +148,8 @@ IGNORE_DISCONNECTED_MODULES:
 - avali_logo
 - aef2
 - tholin
+- lunar_art_1
+- lunar_art_2
 - gf180mcu_ws_ip__id
 - gf180mcu_ws_ip__logo
 
@@ -247,7 +262,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/Multiplexer/runs/latest/final/lib/nom_tt_025C_5v00/multiplexer__nom_tt_025C_5v00.lib
     instances:
       multiplexer:
-        location: [1475, 2950]
+        location: [1600, 2900]
         orientation: N
   as65x:
     gds:
@@ -274,7 +289,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/AS65x/runs/latest/final/lib/nom_tt_025C_5v00/as65x__nom_tt_025C_5v00.lib
     instances:
       as65x:
-        location: [700, 3000]
+        location: [2700, 2550]
         orientation: N
   c64pla:
     gds:
@@ -328,7 +343,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/SID/runs/latest/final/lib/nom_tt_025C_5v00/sid__nom_tt_025C_5v00.lib
     instances:
       sid:
-        location: [2700, 1500]
+        location: [2750, 1500]
         orientation: N
   repeater:
     gds:
@@ -355,7 +370,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/InputRepeater/runs/latest/final/lib/nom_tt_025C_5v00/repeater__nom_tt_025C_5v00.lib
     instances:
       repeater:
-        location: [2800, 2700]
+        location: [700, 2600]
         orientation: N
   gpiochip:
     gds:
@@ -382,7 +397,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/GPIO/runs/latest/final/lib/nom_tt_025C_5v00/gpiochip__nom_tt_025C_5v00.lib
     instances:
       gpiochip:
-        location: [650, 2100]
+        location: [600, 2000]
         orientation: N
   dram_controller:
     gds:
@@ -409,7 +424,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/DRAMController/runs/latest/final/lib/nom_tt_025C_5v00/dram_controller__nom_tt_025C_5v00.lib
     instances:
       dram_controller:
-        location: [2700, 3200]
+        location: [700, 4300]
         orientation: N
   ntsc:
     gds:
@@ -436,7 +451,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/NTSCTest/runs/latest/final/lib/nom_tt_025C_5v00/ntsc__nom_tt_025C_5v00.lib
     instances:
       ntsc:
-        location: [650, 700]
+        location: [600, 500]
         orientation: N
   misc:
     gds:
@@ -463,7 +478,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/MiscStuff/runs/latest/final/lib/nom_tt_025C_5v00/misc__nom_tt_025C_5v00.lib
     instances:
       misc:
-        location: [1150, 1900]
+        location: [1100, 1675]
         orientation: N
   as65rv32:
     gds:
@@ -490,7 +505,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/65RV32/runs/latest/final/lib/nom_tt_025C_5v00/as65rv32__nom_tt_025C_5v00.lib
     instances:
       as65rv32:
-        location: [1700, 1900]
+        location: [1700, 1675]
         orientation: N
   fm:
     gds:
@@ -517,7 +532,34 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/FMSynth/runs/latest/final/lib/nom_tt_025C_5v00/fm__nom_tt_025C_5v00.lib
     instances:
       fm:
-        location: [1475, 3900]
+        location: [1400, 3800]
+        orientation: N
+  secret_message:
+    gds:
+      - dir::../macros/SecretMessage/runs/latest/final/gds/secret_message.gds
+    lef:
+      - dir::../macros/SecretMessage/runs/latest/final/lef/secret_message.lef
+    pnl:
+      - dir::../macros/SecretMessage/runs/latest/final/pnl/secret_message.pnl.v
+    nl:
+      - dir::../macros/SecretMessage/runs/latest/final/nl/secret_message.nl.v
+    spef:
+      min_*: dir::../macros/SecretMessage/runs/latest/final/spef/min/secret_message.min.spef
+      nom_*: dir::../macros/SecretMessage/runs/latest/final/spef/nom/secret_message.nom.spef
+      max_*: dir::../macros/SecretMessage/runs/latest/final/spef/max/secret_message.max.spef
+    lib:
+      max_ff_n40C_5v50: dir::../macros/SecretMessage/runs/latest/final/lib/max_ff_n40C_5v50/secret_message__max_ff_n40C_5v50.lib
+      max_ss_125C_4v50: dir::../macros/SecretMessage/runs/latest/final/lib/max_ss_125C_4v50/secret_message__max_ss_125C_4v50.lib
+      max_tt_025C_5v00: dir::../macros/SecretMessage/runs/latest/final/lib/max_tt_025C_5v00/secret_message__max_tt_025C_5v00.lib
+      min_ff_n40C_5v50: dir::../macros/SecretMessage/runs/latest/final/lib/min_ff_n40C_5v50/secret_message__min_ff_n40C_5v50.lib
+      min_ss_125C_4v50: dir::../macros/SecretMessage/runs/latest/final/lib/min_ss_125C_4v50/secret_message__min_ss_125C_4v50.lib
+      min_tt_025C_5v00: dir::../macros/SecretMessage/runs/latest/final/lib/min_tt_025C_5v00/secret_message__min_tt_025C_5v00.lib
+      nom_ff_n40C_5v50: dir::../macros/SecretMessage/runs/latest/final/lib/nom_ff_n40C_5v50/secret_message__nom_ff_n40C_5v50.lib
+      nom_ss_125C_4v50: dir::../macros/SecretMessage/runs/latest/final/lib/nom_ss_125C_4v50/secret_message__nom_ss_125C_4v50.lib
+      nom_tt_025C_5v00: dir::../macros/SecretMessage/runs/latest/final/lib/nom_tt_025C_5v00/secret_message__nom_tt_025C_5v00.lib
+    instances:
+      secret_message:
+        location: [700, 1625]
         orientation: N
   r2r_dac_buffered:
     gds:
@@ -559,6 +601,9 @@ MACROS:
         orientation: N
       dac9:
         location: [2925, 600]
+        orientation: N
+      dac10:
+        location: [2550, 1350]
         orientation: N
   gf180mcu_fd_io__asig_5p0_fixed:
     gds:
@@ -639,7 +684,35 @@ MACROS:
         - dir::../silicon_art/tholin.lib
     instances:
       tholin:
-        location: [2450, 3900]
+        location: [2450, 3890]
+        orientation: N
+  lunar_art_1:
+    gds:
+      - dir::../silicon_art/lunar_art_1.gds
+    lef:
+      - dir::../silicon_art/lunar_art_1.lef
+    vh:
+      - dir::../silicon_art/lunar_art_1.v
+    lib:
+      "*":
+        - dir::../silicon_art/lunar_art_1.lib
+    instances:
+      lunar_art_1:
+        location: [2400, 2900]
+        orientation: N
+  lunar_art_2:
+    gds:
+      - dir::../silicon_art/lunar_art_2.gds
+    lef:
+      - dir::../silicon_art/lunar_art_2.lef
+    vh:
+      - dir::../silicon_art/lunar_art_2.v
+    lib:
+      "*":
+        - dir::../silicon_art/lunar_art_2.lib
+    instances:
+      lunar_art_2:
+        location: [500, 2900]
         orientation: N
 
 FP_MACRO_HORIZONTAL_HALO: 5
@@ -653,6 +726,8 @@ LVS_FLATTEN_CELLS:
 - avali_logo
 - aef2
 - tholin
+- lunar_art_1
+- lunar_art_2
 
 # gf180mcu_ws_ip__id has no ports and components
 # therefore make it an abstract cell in the layout
@@ -662,3 +737,5 @@ MAGIC_EXT_ABSTRACT_CELLS:
 - avali_logo
 - aef2
 - tholin
+- lunar_art_1
+- lunar_art_2

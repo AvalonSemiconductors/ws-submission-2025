@@ -55,6 +55,9 @@ module multiplexer(
 	input [2:0] io_oe_fm,
 	output rst_override_n_fm,
 	
+	input [8:0] io_out_secret_message,
+	output rst_override_n_secret_message,
+	
 	output [4:0] const_one,
 	output [6:0] const_zero,
 	input [4:0] design_sel
@@ -151,6 +154,13 @@ always @(*) begin
 				io_pd_sel = {2'b0, 1'b1, 39'h0};
 				io_pu_sel = {1'b0, 1'b1, 14'h0, 2'b11, 24'h0};
 			end
+			5'b10100: begin
+				io_oe_sel = {32'h0, 9'h1FF, 1'b0};
+				io_out_sel = {32'h0, io_out_secret_message, 1'b0};
+				io_cs_sel = {41'h0, 1'b1};
+				io_pd_sel = {41'h0, 1'b1};
+				io_pu_sel = 0;
+			end
 		endcase
 	end
 end
@@ -164,5 +174,6 @@ assign rst_override_n_dram_controller = design_sel == 5'b11001;
 assign rst_override_n_ntsc = design_sel == 5'b11000;
 assign rst_override_n_misc = is_misc;
 assign rst_override_n_fm = design_sel == 5'b10000;
+assign rst_override_n_secret_message = design_sel == 5'b10100;
 
 endmodule

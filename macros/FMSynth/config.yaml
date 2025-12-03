@@ -4,9 +4,9 @@ meta:
 
 RUN_LINTER: false
 DESIGN_NAME: fm
-VERILOG_FILES: ["dir::src/FM_channels.v", "dir::src/multiplier.v", "dir::src/multiplier_2.v", "dir::src/FM_top.v", "dir::src/wrapped_fm.v", "dir::../SID/src/adc.v"]
+VERILOG_FILES: ["dir::src/FM_channels.v", "dir::src/multiplier.v", "dir::src/multiplier_2.v", "dir::src/FM_top.v", "dir::src/wrapped_fm.v", "dir::../SID/src/adc.v", "dir::../SID/src/SID_filter.v"]
 CLOCK_PERIOD: 120
-DIE_AREA: [0, 0, 750, 600]
+DIE_AREA: [0, 0, 900, 800]
 RUN_MAGIC_DRC: true
 SYNTH_STRATEGY: AREA 1
 PL_RESIZER_SETUP_SLACK_MARGIN: 0.3

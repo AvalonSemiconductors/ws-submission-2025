@@ -63,11 +63,21 @@ diceroll diceroll(
 	.io_out(io_out_diceroll)
 );
 
-wire [2:0] wire_out_blinker;
+wire [2:0] io_out_blinker;
 blinker blinker(
 	.clk_i(clk_i),
-	.io_out(wire_out_blinker),
+	.io_out(io_out_blinker),
 	.rst_n(design_sel_buffered == 3 && rst_override_n && io_in[0])
+);
+
+wire [31:0] vga_demo_rgb;
+wire [1:0] vga_demo_io_out;
+vga_demo vga_demo(
+	.clk(clk_i),
+	.rst_n(design_sel_buffered == 5 && rst_override_n && io_in[0]),
+	.argb(vga_demo_rgb),
+	.hsync(vga_demo_io_out[0]),
+	.vsync(vga_demo_io_out[1])
 );
 
 wire [10:0] nano_PA;
@@ -134,9 +144,9 @@ always @(*) begin
 			vga_col_sel_b = {4{vga1_out[2], vga1_out[6]}};
 		end
 		5: begin
-			vga_col_sel_r = 8'hFF;
-			vga_col_sel_g = 8'hFF;
-			vga_col_sel_b = 8'hFF;
+			vga_col_sel_r = vga_demo_rgb[7:0];
+			vga_col_sel_g = vga_demo_rgb[15:8];
+			vga_col_sel_b = vga_demo_rgb[23:16];
 		end
 	endcase
 end
@@ -170,11 +180,11 @@ always @(*) begin
 			io_out_sel = {8'h00, vga1_out, 26'h0};
 			io_oe_sel = {8'h00, 8'hFF, 26'h0};
 			io_pu_sel = 0;
-			io_pd_sel = {8'h00, 8'hFF, 25'h0, 1'b1};
-			io_cs_sel = {8'h00, 8'hFF, 25'h0, 1'b1};
+			io_pd_sel = {8'hFF, 8'h00, 25'h0, 1'b1};
+			io_cs_sel = {8'hFF, 8'h00, 25'h0, 1'b1};
 		end
 		3: begin
-			io_out_sel = {1'b0, io_out_diceroll, {28{io_out_hellorld}}, wire_out_blinker, 1'b0};
+			io_out_sel = {1'b0, io_out_diceroll, {28{io_out_hellorld}}, io_out_blinker, 1'b0};
 			io_oe_sel = {1'b0, 9'h1F, 31'h7FFFFFFF, 1'b0};
 			io_pu_sel = 0;
 			io_pd_sel = {1'b1, 40'h0, 1'b1};
@@ -188,17 +198,17 @@ always @(*) begin
 			io_cs_sel = {27'h0, 1'b1, 13'h0, 1'b1};
 		end
 		5: begin
-			io_out_sel = {8'h00, 8'hAA, 26'h0};
+			io_out_sel = {8'h00, 6'h2A, vga_demo_io_out, 26'h0};
 			io_oe_sel = {8'h00, 8'hFF, 26'h0};
-			io_pu_sel = 0;
-			io_pd_sel = {8'h00, 8'hFF, 25'h0, 1'b1};
-			io_cs_sel = {8'h00, 8'hFF, 25'h0, 1'b1};
+			io_pu_sel = {8'hFF, 8'h00, 26'h0};
+			io_pd_sel = 1;
+			io_cs_sel = {8'hFF, 8'h00, 25'h0, 1'b1};
 		end
 		6: begin
 			io_out_sel = {5'h0, mc_io_out[16:8], 19'h0, mc_io_out[7:0], 1'b0};
 			io_oe_sel = {5'h0, 9'h1FF, 19'h0, 8'hFF, 1'b0};
-			io_pu_sel = 0;
-			io_pd_sel = {5'h1F, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
+			io_pu_sel = {5'h1F, 37'h0};
+			io_pd_sel = {5'h0, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
 			io_cs_sel = {5'h1F, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
 		end
 		default: begin

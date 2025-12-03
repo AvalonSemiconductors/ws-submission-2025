@@ -4,9 +4,9 @@ TARGETS:=$(OBJECTS) $(PROJECT).elf $(PROJECT).bin $(PROJECT).debug.txt
 
 all : $(TARGETS)
 
-ARCHFLAGS:=-march=rv32im_zicsr -mabi=ilp32
+ARCHFLAGS:=-march=rv32ima_zicsr -mabi=ilp32
 
-PREFIX:=/home/tholin/riscv/bin/riscv32-unknown-elf-
+PREFIX:=/home/lucah/riscv/bin/riscv32-unknown-elf-
 CFLAGS:=-I.
 
 CFLAGS+=-fno-stack-protector

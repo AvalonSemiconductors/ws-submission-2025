@@ -11,7 +11,7 @@ module tb (
 	input NMIn,
 	output SYNC,
 	output [15:0] A,
-	output [7:0] D_out,
+	output tri0 [7:0] D_out,
 	input [7:0] D_in,
 	output RWn,
 	input AEC,
@@ -53,6 +53,7 @@ assign MLn = iopads[1];
 assign iopads[5] = SOn;
 assign PH2OUT = iopads[6];
 assign iopads[7] = RESETn;
+
 
 `ifdef USE_POWER_PINS
 tri1 vddcore;

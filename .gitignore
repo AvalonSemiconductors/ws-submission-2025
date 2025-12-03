@@ -19,3 +19,7 @@ cocotb/NTSC/frame.png
 *.elf
 *.bin
 cocotb/65RV32/C/*.txt
+silicon_art/
+macros/SecretMessage/src/message.v
+docs/venv/
+docs/build/

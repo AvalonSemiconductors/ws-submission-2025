@@ -14,12 +14,14 @@ module cpurv32(
 	input SOn,
 	output SYNC,
 	output ALE,
+	output reg bus_extend,
+	output reg reset_ALE,
 	
 	output RWn,
 	output RWn_oe,
 	output [15:0] A_o,
 	output A_oe,
-	output MLn,
+	output reg MLn,
 	output reg VPn,
 	
 	output [7:0] D_o,
@@ -39,17 +41,11 @@ module cpurv32(
 	output reg uart_reloc
 );
 
-assign ALE = 1'b0;
-assign MLn = 1'b1;
-
 assign PH1OUT = PH0IN;
 assign PH2OUT = !PH0IN;
 
 assign A_oe = AEC;
 assign RWn_oe = AEC;
-
-//ISA TODO:
-//A, maybe?
 
 // Vectors:
 // $FFFF_FFF0 - RESERVED
@@ -57,18 +53,28 @@ assign RWn_oe = AEC;
 // $FFFF_FFF8 - IRQ
 // $FFFF_FFFC - RESET
 
-//TODO: an NMI should clear NMIE
-
 reg nmi_edge;
 reg sync_irqs_reg;
 reg irqn_sync;
 reg nmin_sync;
 reg son_sync;
 reg nmi_pending;
+reg breakpoint_trigger;
 wire irq_actual = !(sync_irqs_reg ? irqn_sync : IRQn);
 wire nmi_actual = !(sync_irqs_reg ? nmin_sync : NMIn);
 wire son_actual = !(sync_irqs_reg ? son_sync : SOn);
 wire nmi_edge_detect = nmi_actual && !nmi_edge;
+
+reg [3:0] mem_state;
+reg [31:0] mem_buffer;
+reg [31:0] addr_buffer;
+reg mem_type;
+reg mem_extend;
+reg ifetch;
+reg [1:0] mem_byte;
+reg [28:0] reservation_slot;
+reg [15:0] addr_hi_latch;
+reg just_reset;
 
 reg rdy_latched;
 wire rdy_actual = (sync_rdy ? rdy_latched : RDY) || (!rdy_writes && !RWn);
@@ -88,11 +94,13 @@ wire isLUI    = ireg[6:0] == 7'b0110111;
 wire isLoad   = ireg[6:0] == 7'b0000011;
 wire isStore  = ireg[6:0] == 7'b0100011;
 wire isSYSTEM = ireg[6:0] == 7'b1110011;
+wire isAtomic = ireg[6:0] == 7'b0101111;
 
 wire [4:0] rs1Id  = ireg[19:15];
 wire [4:0] rs2Id  = ireg[24:20];
 wire [4:0] rdId   = ireg[11:7];
 wire [2:0] funct3 = ireg[14:12];
+wire [4:0] funct5 = ireg[31:27];
 wire [6:0] funct7 = ireg[31:25];
 wire [11:0] func12 = ireg[31:20];
 wire [31:0] Uimm = {ireg[31], ireg[30:12], 12'h000};
@@ -100,6 +108,8 @@ wire [31:0] Iimm = {{21{ireg[31]}}, ireg[30:20]};
 wire [31:0] Simm = {{21{ireg[31]}}, ireg[30:25], ireg[11:7]};
 wire [31:0] Bimm = {{20{ireg[31]}}, ireg[7], ireg[30:25], ireg[11:8], 1'b0};
 wire [31:0] Jimm = {{12{ireg[31]}}, ireg[19:12], ireg[20], ireg[30:21], 1'b0};
+
+wire isLoadOrLoadReserved = isLoad || (isAtomic && funct5 == 2);
 
 reg [31:0] PC;
 reg [31:0] prev_PC;
@@ -124,8 +134,8 @@ wire [31:0] a0 = regs[10];
 wire [31:0] a1 = regs[11];
 `endif
 
-wire [31:0] aluIn1 = isJAL || isAUIPC ? prev_PC : rs1;
-wire [31:0] aluIn2 = isStore ? Simm : (isALUreg || isBranch ? rs2 : (isAUIPC ? Uimm : Iimm));
+wire [31:0] aluIn1 = isJAL || isAUIPC ? prev_PC : (isAtomic ? mem_buffer : rs1);
+wire [31:0] aluIn2 = isStore ? Simm : (isALUreg || isBranch || isAtomic ? rs2 : (isAUIPC ? Uimm : Iimm));
 wire [31:0] XOR = aluIn1 ^ aluIn2;
 wire [31:0] plus = aluIn2 + aluIn1;
 wire EQ = XOR == 0;
@@ -224,22 +234,39 @@ reg [31:0] mnscratch;
 reg [31:0] mnepc;
 reg NMIE;
 
+//INT
+reg [31:0] mepc;
+reg wfi;
+reg mie;
+reg mdt;
+reg mpie;
+
 //Peripherals
 wire uart_hb;
 wire uart_busy;
 wire [7:0] uart_dout;
 reg [15:0] uart_divisor;
+reg [31:0] timer;
+reg [31:0] timermatch;
 
 //CSRs
 reg [63:0] cycle;
 reg [63:0] instret;
 reg [37:0] rng;
+
+reg mtie;
+reg meie;
+reg mtip;
+reg meip;
+reg [31:0] mscratch;
+reg [3:0] mcause;
+
 reg O;
 wire [11:0] csr_id = ireg[31:20];
-wire [31:0] csr_wval_raw = funct3[2] ? {27'h0, Uimm} : rs1;
+wire [31:0] csr_wval_raw = funct3[2] ? {27'h0, rs1Id} : rs1;
 wire csr_write_ignore = (funct3 == 2 || funct3 == 3) && rs1Id == 0;
 wire csr_read_ignore = funct3 == 0 && rdId == 0;
-wire csr_act = !i_ignore && isSYSTEM && funct3[1:0] != 0;
+wire csr_act = !i_ignore && isSYSTEM && funct3[1:0] != 0 && mem_state == 0 && rdy_actual;
 
 reg [31:0] csr_rval;
 always @(*) begin
@@ -265,10 +292,19 @@ always @(*) begin
 		12'hC82: csr_rval = instret[63:32];
 		12'hBC0: csr_rval = {24'h0, port_dir};
 		12'hBC1: csr_rval = {24'h0, (port_val & port_dir) | (port_in & ~port_dir)};
+		12'hBC2: csr_rval = {29'h0, bus_extend, O, uart_reloc};
+		12'hBC3: csr_rval = timer;
+		12'hBC4: csr_rval = timermatch;
 		12'h139: csr_rval = uart_busy ? 32'hFFFFFFFF : 32'h0;
 		12'h140: csr_rval = uart_hb ? {24'h0, uart_dout} : 32'hFFFFFFFF;
 		12'h142: csr_rval = {16'h0000, uart_divisor};
-		12'hBC2: csr_rval = {30'h0, O, uart_reloc};
+		12'h340: csr_rval = mscratch;
+		12'h304: csr_rval = {20'h0, meie, 3'h0, mtie, 7'h00};
+		12'h344: csr_rval = {20'h0, meip, 3'h0, mtip, 7'h00};
+		12'h341: csr_rval = mepc;
+		12'h300: csr_rval = {24'h0, mpie, 3'h0, mie, 3'h0};
+		12'h342: csr_rval = {mcause[3], 28'h0, mcause[2:0]};
+		12'h310: csr_rval = {21'h0, mdt, 10'h0};
 	endcase
 end
 
@@ -282,18 +318,14 @@ always @(*) begin
 	endcase
 end
 
-reg [3:0] mem_state;
-reg [31:0] mem_buffer;
-reg [31:0] addr_buffer;
-reg mem_type;
-reg mem_extend;
-reg ifetch;
-reg [1:0] mem_byte;
-
-assign A_o = addr_buffer[15:0];
+reg ALE_post;
+wire ALE_pre = addr_buffer[31:16] != addr_hi_latch && bus_extend && mem_state || reset_ALE;
+assign ALE = ALE_pre && !ALE_post;
+assign A_o = !ALE_pre ? addr_buffer[15:0] : addr_buffer[31:16];
 assign D_o = mem_buffer[7:0];
 assign D_oe = (!RWn && (PH0IN || !do_latency)) && AEC;
-assign RWn = !(mem_state && mem_type);
+assign RWn = !(mem_state && mem_type && !ALE_pre);
+always @(posedge PH0IN) ALE_post <= ALE_pre;
 
 reg [2:0] state;
 localparam FETCH = 0;
@@ -301,8 +333,11 @@ localparam MUL = 1;
 localparam DIV1 = 2;
 localparam DIV2 = 3;
 localparam VECTOR = 4;
+localparam ATOMIC = 5;
 
 assign SYNC = ifetch;
+
+wire irq_check = mem_state == 4'b1000 && ifetch;
 
 reg [31:0] mem_in;
 always @(*) begin
@@ -316,12 +351,20 @@ end
 
 always @(negedge PH0IN) begin
 	regs[0] <= 0;
-	nmi_edge <= nmi_actual;
-	irqn_sync <= IRQn;
-	nmin_sync <= NMIn;
-	son_sync <= SOn;
-	if(rst_n && nmi_edge_detect) nmi_pending <= 1'b1;
-	if(rst_n) cycle <= cycle + 1;
+	nmi_edge <= nmi_actual & rst_n;
+	irqn_sync <= IRQn | rst_n;
+	nmin_sync <= NMIn | rst_n;
+	son_sync <= SOn | rst_n;
+	if(rst_n) begin
+		timer <= timer + 1;
+		cycle <= cycle + 1;
+		if(timer >= timermatch) begin
+			timer <= 0;
+			mtip <= 1'b1;
+		end
+		if(nmi_edge_detect) nmi_pending <= 1'b1;
+		if(irq_actual && mie) meip <= 1'b1;
+	end
 	if(!rst_n) begin
 		mem_state <= 4'b1000;
 		addr_buffer <= 32'hFFFFFFFC;
@@ -342,39 +385,85 @@ always @(negedge PH0IN) begin
 		nmi_pending <= 0;
 		mem_byte <= 0;
 		sync_irqs_reg <= sync_irqs;
+		mtie <= 0;
+		meie <= 0;
+		mtip <= 0;
+		meip <= 0;
+		wfi <= 0;
+		mie <= 0;
+		mdt <= 0;
+		mpie <= 0;
+		breakpoint_trigger <= 0;
+		timer <= 0;
+		timermatch <= 32'hFFFFFFFF;
+		MLn <= 1'b1;
+		bus_extend <= 0;
+		reset_ALE <= 0;
+		just_reset <= 1'b1;
+		addr_hi_latch <= 0;
 	end else if(rdy_actual) begin
+		if(ALE_pre) addr_hi_latch <= addr_buffer[31:16];
 		if(son_actual) O <= 1'b1;
 		//Handle irupt in first mem_state
-		if(mem_state == 4'b1000 && ifetch) begin
-			if(nmi_pending) begin
-				
-			end
-		end
-		if(mem_state) begin
-			mem_state <= {1'b0, mem_state[3:1]};
-			mem_byte <= mem_byte + 1;
-			addr_buffer <= addr_buffer + 1;
-			if(mem_type) begin
-				mem_buffer <= {8'hxx, mem_buffer[31:8]};
-			end else begin
-				mem_buffer <= mem_in;
-				if(ifetch) begin
-					i_ignore <= 0;
-					if(mem_state == 1) begin
-						instret <= instret + 1;
-						PC <= PC_next;
-						prev_PC <= PC;
-						ireg <= mem_in;
-					end
-				end else if(isLoad) begin
-					regs[rdId] <= mem_in;
+		if(irq_check && nmi_pending && NMIE) begin
+			nmi_pending <= 0;
+			NMIE <= 0;
+			mnepc <= PC;
+			mem_state <= 4'b1000;
+			VPn <= 0;
+			mem_byte <= 0;
+			addr_buffer <= 32'hFFFFFFF4;
+			ifetch <= 0;
+			state <= VECTOR;
+			wfi <= 0;
+		end else if(irq_check && ((meip && meie && mie) || breakpoint_trigger || (mtip && mtie && mie)) && NMIE) begin
+			mcause <= breakpoint_trigger ? 4'h4 : (mtip ? 4'hA : 4'h9);
+			if(!breakpoint_trigger && mtip) mtip <= 0;
+			if(!breakpoint_trigger && !mtip && meip) meip <= 0;
+			breakpoint_trigger <= 0;
+			mpie <= mie;
+			mie <= 1'b0;
+			mepc <= PC;
+			mem_state <= 4'b1000;
+			VPn <= 0;
+			mem_byte <= 0;
+			addr_buffer <= 32'hFFFFFFF8;
+			ifetch <= 0;
+			state <= VECTOR;
+			wfi <= 0;
+		end else if(mem_state) begin
+			if(just_reset) begin
+				reset_ALE <= 1'b1;
+				just_reset <= 0;
+			end else if(reset_ALE) reset_ALE <= 0;
+			else if(!bus_extend || addr_buffer[31:16] == addr_hi_latch) begin
+				if(!ifetch || !wfi) begin
+					mem_state <= {1'b0, mem_state[3:1]};
+					mem_byte <= mem_byte + 1;
+					addr_buffer <= addr_buffer + 1;
 				end
-				if((isLoad || isStore) && mem_state == 1 && !ifetch && i_ignore) begin
-					addr_buffer <= PC;
-					ifetch <= 1'b1;
-					mem_state <= 4'b1000;
-					mem_type <= 1'b0;
-					mem_byte <= 0;
+				if(mem_type) begin
+					mem_buffer <= {8'hxx, mem_buffer[31:8]};
+				end else begin
+					mem_buffer <= mem_in;
+					if(ifetch) begin
+						i_ignore <= 0;
+						if(mem_state == 1) begin
+							instret <= instret + 1;
+							PC <= PC_next;
+							prev_PC <= PC;
+							ireg <= mem_in;
+						end
+					end else if((isLoadOrLoadReserved && state == FETCH) || state == ATOMIC) begin
+						regs[rdId] <= mem_in;
+					end
+					if((isLoadOrLoadReserved || isStore) && mem_state == 1 && !ifetch && i_ignore && state == FETCH) begin
+						addr_buffer <= PC;
+						ifetch <= 1'b1;
+						mem_state <= 4'b1000;
+						mem_type <= 1'b0;
+						mem_byte <= 0;
+					end
 				end
 			end
 		end else begin
@@ -386,6 +475,7 @@ always @(negedge PH0IN) begin
 					mem_type <= 1'b0;
 					i_ignore <= 1'b1;
 					mem_byte <= 0;
+					MLn <= 1'b1;
 					
 					if(!i_ignore) begin
 						if(isSYSTEM) begin
@@ -401,20 +491,52 @@ always @(negedge PH0IN) begin
 										end
 										12'h740: mnscratch <= csr_wval;
 										12'h741: mnepc <= csr_wval;
-										12'h744: NMIE <= NMIE | csr_wval[3]; //TODO: When NMIE=0, the hart behaves as though mstatus.MPRV were clear, regardless of the current setting of mstatus.MPRV
+										12'h744: NMIE <= NMIE | csr_wval[3];
 										12'hBC0: port_dir <= csr_wval[7:0];
 										12'hBC1: port_val <= csr_wval[7:0];
 										12'h142: uart_divisor <= csr_wval[15:0];
 										12'hBC2: begin
 											uart_reloc <= csr_wval[0];
 											O <= csr_wval[1];
+											bus_extend <= csr_wval[2];
 										end
+										12'hBC3: timer <= csr_wval;
+										12'hBC4: timermatch <= csr_wval;
 										12'h139: begin //Silence simulator warning for UTX
 										end
-										12'hFC5: begin //Silence simulator warning for UTX
+										12'hFC5: begin
 										end
-										12'hFC6: begin //Silence simulator warning for UTX
+										12'hFC6: begin
 										end
+										12'h340: mscratch <= csr_wval;
+										12'h304: begin
+											mtie <= csr_wval[7];
+											meie <= csr_wval[11];
+										end
+										12'h344: begin
+											mtip <= csr_wval[7];
+											meip <= csr_wval[11];
+										end
+										12'h341: mepc <= csr_wval;
+										12'h300: begin
+											mie <= csr_wval[3];
+											mpie <= csr_wval[7];
+										end
+										12'h342: begin
+											mcause[3] <= csr_wval[31];
+											mcause[2:0] <= csr_wval[2:0];
+										end
+										12'h305: begin
+											//Because of the 6502-like-ness of this CPU, the vector is in memory
+											//Writing this CSR attempts to write that vector
+											//...Wait, what? What do you m ean this is cursed?
+											mem_state <= 4'b1000;
+											addr_buffer <= 32'hFFFFFFF8;
+											mem_buffer <= csr_wval;
+											mem_type <= 1'b1;
+											ifetch <= 1'b0;
+										end
+										12'h310: mdt <= csr_wval[10];
 									endcase
 								end
 							end else if(funct3 == 0) begin
@@ -424,6 +546,19 @@ always @(negedge PH0IN) begin
 									NMIE <= 1'b1;
 									PC <= mnepc;
 									addr_buffer <= mnepc;
+								end else if(func12 == 12'h105) begin
+									//WFI
+									wfi <= 1'b1;
+									mie <= 1'b1;
+								end else if(func12[7:0] == 8'h02) begin
+									//MRET
+									mie <= mpie;
+									mpie <= 1'b1;
+									PC <= mepc;
+									addr_buffer <= mepc;
+								end else if(func12 == 1) begin
+									//EBREAK 3 breakpoint
+									breakpoint_trigger <= 1'b1;
 								end
 							end
 						end else if(is_muldiv) begin
@@ -443,21 +578,27 @@ always @(negedge PH0IN) begin
 								PC <= PC_jmp;
 								addr_buffer <= PC_jmp;
 							end
-						end else if(isLoad) begin
-							mem_extend <= !funct3[2];
+						end else if(isLoad || (isAtomic && funct5 != 3)) begin
+							mem_extend <= !funct3[2] | isAtomic;
 							mem_state <= funct3[1:0] == 0 ? 4'b0001 : (funct3[1:0] == 1 ? 4'b0010 : 4'b1000);
-							addr_buffer <= plus;
+							addr_buffer <= isAtomic ? rs1 : plus;
 							mem_type <= 1'b0;
 							ifetch <= 1'b0;
-						end else if(isStore) begin
+							if(isAtomic && funct5 == 2) reservation_slot <= rs1[31:3];
+							if(isAtomic && funct5 != 2) begin
+								state <= ATOMIC;
+								MLn <= 0;
+							end
+						end else if(isStore || (isAtomic && funct5 == 3 && rs1[31:3] == reservation_slot)) begin
 							mem_state <= funct3[1:0] == 0 ? 4'b0001 : (funct3[1:0] == 1 ? 4'b0010 : 4'b1000);
-							addr_buffer <= plus;
+							addr_buffer <= isAtomic ? rs1 : plus;
 							mem_buffer <= rs2;
 							mem_type <= 1'b1;
 							ifetch <= 1'b0;
 						end else if(isLUI) regs[rdId] <= Uimm;
 						else if(isAUIPC) regs[rdId] <= plus;
 						else if(isALUreg || isALUimm) regs[rdId] <= ALUout;
+						if(isAtomic && funct5 == 3) regs[rdId] <= {31'h0, rs1[31:3] != reservation_slot};
 					end
 				end
 				MUL: begin
@@ -479,6 +620,28 @@ always @(negedge PH0IN) begin
 				VECTOR: begin
 					PC <= mem_buffer;
 					VPn <= 1'b1;
+					state <= FETCH;
+				end
+				ATOMIC: begin
+				`ifdef SIM
+				$display("Atomic op exec");
+				`endif
+					case(funct5)
+						default: mem_buffer <= rs2;
+						0: mem_buffer <= plus;
+						4: mem_buffer <= XOR;
+						12: mem_buffer <= aluIn1 & aluIn2;
+						8: mem_buffer <= aluIn1 | aluIn2;
+						16: mem_buffer <= $signed(rs2) < $signed(mem_buffer) ? rs2 : mem_buffer;
+						20: mem_buffer <= $signed(rs2) > $signed(mem_buffer) ? rs2 : mem_buffer;
+						24: mem_buffer <= rs2 < mem_buffer ? rs2 : mem_buffer;
+						28: mem_buffer <= rs2 > mem_buffer ? rs2 : mem_buffer;
+					endcase
+					mem_state <= funct3[1:0] == 0 ? 4'b0001 : (funct3[1:0] == 1 ? 4'b0010 : 4'b1000);
+					addr_buffer <= rs1;
+					mem_type <= 1'b1;
+					mem_byte <= 0;
+					ifetch <= 1'b0;
 					state <= FETCH;
 				end
 			endcase

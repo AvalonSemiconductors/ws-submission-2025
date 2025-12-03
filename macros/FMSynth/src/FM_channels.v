@@ -7,7 +7,7 @@
 `define DECAY_SUSTAIN 'b10
 `define RELEASE 'b11
 
-module FM_channels #(parameter has_fm = 1) (
+module FM_channels #(parameter has_fm = 1, parameter has_volume = 1) (
 	input [15:0] freq1,
 	input [15:0] freq2,
 	input [15:0] freq3,
@@ -218,7 +218,6 @@ end
 `ifdef SIM
 wire [19:0] mul_sample = osc_sample * env_vol[curr_channel]; 
 wire [11:0] enveloped_sample = mul_sample[19:8];
-wire [19:0] vol_sample = enveloped_sample * curr_volume;
 `else
 wire [19:0] mul_sample;
 bad_multiplier mul1(
@@ -227,13 +226,23 @@ bad_multiplier mul1(
 	.o(mul_sample)
 );
 wire [11:0] enveloped_sample = mul_sample[19:8];
-wire [19:0] vol_sample;
-bad_multiplier mul2(
-	.a(enveloped_sample),
-	.b(curr_volume),
-	.o(vol_sample)
-);
 `endif
+
+wire [19:0] vol_sample;
+generate
+	if(has_volume == 0) assign vol_sample = {enveloped_sample, 8'h00};
+	else begin
+		`ifdef SIM
+		assign vol_sample = enveloped_sample * curr_volume;
+		`else
+		bad_multiplier mul2(
+			.a(enveloped_sample),
+			.b(curr_volume),
+			.o(vol_sample)
+		);
+		`endif
+	end
+endgenerate
 
 wire [17:0] freq_adjusted;
 generate
@@ -310,7 +319,7 @@ always @(posedge clk) begin
 			/*
 			* Accumulator + LFSR
 			*/
-			samples[curr_channel] <= mul_sample[19:8];
+			samples[curr_channel] <= vol_sample[19:8];
 			accum[curr_channel]  <= (sync && curr_sync_in) || test ? 0 : accum_next;
 			if(!test && !accum[curr_channel][19] && accum_next[19]) begin
 				lfsr[curr_channel][22:1] <= lfsr[curr_channel][21:0];

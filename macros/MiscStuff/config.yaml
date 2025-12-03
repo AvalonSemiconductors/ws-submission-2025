@@ -4,9 +4,9 @@ meta:
 
 # DO CHANGE
 DESIGN_NAME: misc
-VERILOG_FILES: ["dir::src/misc.v", "dir::src/blinker.v", "dir::src/dice.v", "dir::src/hellorld.v", "dir::src/nano.v", "dir::src/mc.v", "dir::src/external/ttgf-vga-tiny-tapeout-animated-logo/src/project.v", "dir::src/external/ttgf-vga-tiny-tapeout-animated-logo/src/hvsync_generator.v", "dir::src/external/tt-waferspace-vga-screensaver/src/bitmap_rom.v", "dir::src/external/tt-waferspace-vga-screensaver/src/gamepad_pmod.v", "dir::src/external/tt-waferspace-vga-screensaver/src/palette.v", "dir::src/external/tt-waferspace-vga-screensaver/src/tt_um_waferspace_vga_screensaver.v", "dir::src/external/tt-waferspace-vga-screensaver/src/vga_sync_generator.v"]
+VERILOG_FILES: ["dir::src/misc.v", "dir::src/blinker.v", "dir::src/dice.v", "dir::src/hellorld.v", "dir::src/nano.v", "dir::src/mc.v", "dir::src/vga_demo.v", "dir::src/external/ttgf-vga-tiny-tapeout-animated-logo/src/project.v", "dir::src/external/ttgf-vga-tiny-tapeout-animated-logo/src/hvsync_generator.v", "dir::src/external/tt-waferspace-vga-screensaver/src/bitmap_rom.v", "dir::src/external/tt-waferspace-vga-screensaver/src/gamepad_pmod.v", "dir::src/external/tt-waferspace-vga-screensaver/src/palette.v", "dir::src/external/tt-waferspace-vga-screensaver/src/tt_um_waferspace_vga_screensaver.v", "dir::src/external/tt-waferspace-vga-screensaver/src/vga_sync_generator.v"]
 CLOCK_PERIOD: 35
-DIE_AREA: [0, 0, 500, 900]
+DIE_AREA: [0, 0, 525, 1000]
 RUN_MAGIC_DRC: true
 SYNTH_STRATEGY: AREA 0
 PL_RESIZER_SETUP_SLACK_MARGIN: 0.25

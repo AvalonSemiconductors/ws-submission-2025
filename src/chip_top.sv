@@ -296,6 +296,9 @@ module chip_top #(
     wire [2:0] io_oe_fm;
     wire rst_override_n_fm;
     
+    wire [8:0] io_out_secret_message;
+    wire rst_override_n_secret_message;
+    
     multiplexer multiplexer(
     `ifdef USE_POWER_PINS
         .VSS(VSS),
@@ -351,7 +354,10 @@ module chip_top #(
         
         .io_out_fm(io_out_fm),
         .io_oe_fm(io_oe_fm),
-        .rst_override_n_fm(rst_override_n_fm)
+        .rst_override_n_fm(rst_override_n_fm),
+        
+        .io_out_secret_message(io_out_secret_message),
+        .rst_override_n_secret_message(rst_override_n_secret_message)
     );
 
     as65x as65x(
@@ -630,6 +636,7 @@ module chip_top #(
     wire [11:0] sample_raw_fm_1;
     wire [11:0] sample_raw_fm_2;
     wire [11:0] sample_raw_fm_3;
+    wire [11:0] sample_raw_fm_4;
     fm fm(
     `ifdef USE_POWER_PINS
         .VSS(VSS),
@@ -642,7 +649,8 @@ module chip_top #(
         .io_oe(io_oe_fm),
         .sample_raw_1(sample_raw_fm_1),
         .sample_raw_2(sample_raw_fm_2),
-        .sample_raw_3(sample_raw_fm_3)
+        .sample_raw_3(sample_raw_fm_3),
+        .sample_raw_4(sample_raw_fm_4)
     );
     
     (* keep *)
@@ -706,6 +714,38 @@ module chip_top #(
         .D10(sample_raw_fm_3[10]),
         .D11(sample_raw_fm_3[11]),
         .OUT(spare_analog_3)
+    );
+    
+    (* keep *)
+    r2r_dac_buffered dac10(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .D0(sample_raw_fm_4[0]),
+        .D1(sample_raw_fm_4[1]),
+        .D2(sample_raw_fm_4[2]),
+        .D3(sample_raw_fm_4[3]),
+        .D4(sample_raw_fm_4[4]),
+        .D5(sample_raw_fm_4[5]),
+        .D6(sample_raw_fm_4[6]),
+        .D7(sample_raw_fm_4[7]),
+        .D8(sample_raw_fm_4[8]),
+        .D9(sample_raw_fm_4[9]),
+        .D10(sample_raw_fm_4[10]),
+        .D11(sample_raw_fm_4[11]),
+        .OUT(spare_analog_4)
+    );
+    
+    secret_message secret_message(
+    `ifdef USE_POWER_PINS
+        .VSS(VSS),
+        .VDD(VDD),
+    `endif
+        .clk_i(clk_buffered),
+        .rst_override_n(rst_override_n_secret_message),
+        .io_in_buffered(io_in_buffered[0]),
+        .io_out(io_out_secret_message)
     );
     
     (* keep *)
@@ -867,6 +907,12 @@ module chip_top #(
     
     (* keep *)
     tholin tholin ();
+    
+    (* keep *)
+    lunar_art_1 lunar_art_1 ();
+    
+    (* keep *)
+    lunar_art_2 lunar_art_2 ();
 
 endmodule
 

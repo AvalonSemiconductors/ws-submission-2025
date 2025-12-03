@@ -41,12 +41,13 @@ async def test_fm(dut):
 	await write_reg(dut, 3, 0x08)
 	await write_reg(dut, 4, 0b01000000)
 	await write_reg(dut, 6, 0xF0)
-	await write_reg(dut, 21, 0xFF)
 	
-	await write_reg(dut, 24, 1)
+	await write_reg(dut, 32+24, 1)
 	
 	await write_reg(dut, 4, 0b01000001)
 	await ClockCycles(dut.clk, 2000)
 	await write_reg(dut, 32+4, 0b00000001)
 	
-	await Timer(22, "ms")
+	await Timer(11, "ms")
+	await write_reg(dut, 32+21, 0x80)
+	await Timer(11, "ms")
