@@ -5,6 +5,8 @@
 `include "../../silicon_art/avali_logo.v"
 `include "../../silicon_art/aef2.v"
 `include "../../silicon_art/tholin.v"
+`include "../../silicon_art/lunar_art_1.v"
+`include "../../silicon_art/lunar_art_2.v"
 `include "../../macros/SID/runs/latest/final/pnl/sid.pnl.v"
 `include "../../macros/Analog/R2R_DAC/verilog/r2r_dac_buffered.v"
 `include "../../macros/GPIO/runs/latest/final/pnl/gpiochip.pnl.v"

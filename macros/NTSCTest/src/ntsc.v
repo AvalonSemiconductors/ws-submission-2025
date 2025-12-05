@@ -70,7 +70,7 @@ reg [7:0] active_line; // 0 -> 245
 wire [6:0] img_1_pixel = active_line[7:1] + active_pixel[9:3] + frame_counter[6:0];
 wire [4:0] img_2_pixel;
 
-wire [11:0] pixel_12bit = {1'b0, (program_select == 5 || program_select == 4'hF) ? img_1_pixel : {img_2_pixel, img_2_pixel[4], img_2_pixel[3]}, 4'h0};
+wire [11:0] pixel_12bit = {1'b0, program_select[0] ? img_1_pixel : {img_2_pixel, img_2_pixel[4], img_2_pixel[3]}, 4'h0};
 wire [11:0] final_img_pixel = `NTSC_BLACK_LEVEL + pixel_12bit + {2'b00, pixel_12bit[11:2]} + {4'h0, pixel_12bit[11:4]};
 
 always @(posedge clk_i) begin

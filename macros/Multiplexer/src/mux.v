@@ -127,7 +127,7 @@ always @(*) begin
 				io_pu_sel = {1'b0, 1'b1, 14'h0, 2'b11, 24'h0};
 			end
 			5'b11010: begin
-				io_oe_sel = {1'b1, 1'b0, io_oe_gpiochip[16:1], 3'b000, {8{io_oe_gpiochip[0]}}, 6'h00, 4'hF, 1'b0, 2'b11};
+				io_oe_sel = {1'b1, 1'b0, io_oe_gpiochip[16:1], 3'b000, {8{io_oe_gpiochip[0]}}, 6'h00, 4'hF, 1'b0, 1'b0, 1'b1};
 				io_out_sel = io_out_gpiochip;
 				io_cs_sel = {1'b0, 1'b1, 38'h0, 1'b1, 1'b0};
 				io_pd_sel = {2'b00, io_pd_gpiochip, 24'h0};
@@ -135,7 +135,7 @@ always @(*) begin
 			end
 			5'b11001: begin
 				io_out_sel = io_out_dram_controller;
-				io_oe_sel = {1'b1, 1'b1, 1'b1, 1'b0, 1'b1, 1'b1, 1'b1, 6'h3F, 1'b0, 2'b11, 3'b0, 16'h0, 3'h7, 1'b0, 1'b0, 1'b1, 1'b0};
+				io_oe_sel = {1'b1, 1'b1, 1'b1, 1'b1, 1'b1, 1'b1, 1'b1, 6'h3F, 1'b0, 2'b11, 3'b0, 16'h0, 3'h7, 1'b0, 1'b0, 1'b1, 1'b0};
 				io_cs_sel = 0;
 				io_pd_sel = {13'h0, 1'b1, 24'h0, 1'b1, 2'b0, 1'b1};
 				io_pu_sel = {16'h0, 3'b111, 23'h0};
@@ -144,7 +144,7 @@ always @(*) begin
 				io_out_sel = {30'h0, io_out_ntsc};
 				io_oe_sel = {30'h0, 12'hFFF};
 				io_cs_sel = 0;
-				io_pd_sel = 42'h3FFFFFFFFFF;
+				io_pd_sel = 42'h3FFFFFFF000;
 				io_pu_sel = 0;
 			end
 			5'b10000: begin

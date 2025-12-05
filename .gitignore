@@ -5,6 +5,7 @@ gf180_drc.lyrdb
 sim_build/
 results.xml
 final/
+*.lyrdb
 librelane_install/
 */runs/
 cocotb/C64PLA/neatPLA/

@@ -79,7 +79,7 @@ always @(posedge sample_clock) begin
 `ifndef IVERILOG
 	fhandle = $fopen("samples.bin", "a+b");
 	$fwrite(fhandle, "%u", 12'hFFF - sample_raw_1);
-	$fwrite(fhandle, "%u", 12'hFFF - sample_raw_2);
+	//$fwrite(fhandle, "%u", 12'hFFF - sample_raw_2);
 	$fflush();
 	$fclose(fhandle);
 `endif

@@ -1,11 +1,11 @@
 `default_nettype none
 
 module message(
-	input [7:0] pointer,
+	input [8:0] pointer,
 	output [8:0] value
 );
 
-reg [7:0] rom;
+reg [8:0] rom;
 assign value = rom;
 always @(*) begin
 	case(pointer)

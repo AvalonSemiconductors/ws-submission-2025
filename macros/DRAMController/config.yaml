@@ -1,8 +1,11 @@
 meta:
   version: 3
   flow: Classic
+  substituting_steps:
+    +Magic.DRC: KLayout.Antenna
+    +Checker.MagicDRC: Checker.KLayoutAntenna
+    +Checker.MaxCapViolations: KLayout.Render
 
-# DO CHANGE
 DESIGN_NAME: dram_controller
 VERILOG_FILES: ["dir::src/dram_controller.v"]
 CLOCK_PERIOD: 35
@@ -15,7 +18,8 @@ GRT_RESIZER_HOLD_SLACK_MARGIN: 0.1
 PL_RESIZER_HOLD_SLACK_MARGIN: 0.1
 PL_RESIZER_HOLD_MAX_BUFFER_PCT: 100
 ERROR_ON_KLAYOUT_DRC: true
-
+DESIGN_REPAIR_TIE_FANOUT: true
+DIODE_ON_PORTS: both
 RUN_CTS: true
 MAX_FANOUT_CONSTRAINT: 6
 CLOCK_PORT: clk_i

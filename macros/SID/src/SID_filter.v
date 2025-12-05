@@ -20,27 +20,27 @@ module SID_filter(
 	output sample_ready
 );
 
-wire [16:0] cutoff_lut = {reg_fc, 6'h00};
+wire [16:0] cutoff_lut = {reg_fc, 6'h20};
 
 reg [10:0] res_lut;
 always @(*) begin
 	case(res_filt[7:4])
-		0: res_lut = 11'h5a8;
-		1: res_lut = 11'h52b;
-		2: res_lut = 11'h4c2;
-		3: res_lut = 11'h468;
-		4: res_lut = 11'h41b;
-		5: res_lut = 11'h3d8;
-		6: res_lut = 11'h39d;
-		7: res_lut = 11'h368;
-		8: res_lut = 11'h339;
-		9: res_lut = 11'h30f;
-		10: res_lut = 11'h2e9;
-		11: res_lut = 11'h2c6;
-		12: res_lut = 11'h2a7;
-		13: res_lut = 11'h28a;
-		14: res_lut = 11'h270;
-		15: res_lut = 11'h257;
+		0: res_lut = 1448;
+		1: res_lut = 1328;
+		2: res_lut = 1218;
+		3: res_lut = 1117;
+		4: res_lut = 1024;
+		5: res_lut = 939;
+		6: res_lut = 861;
+		7: res_lut = 789;
+		8: res_lut = 724;
+		9: res_lut = 663;
+		10: res_lut = 608;
+		11: res_lut = 558;
+		12: res_lut = 512;
+		13: res_lut = 470;
+		14: res_lut = 431;
+		15: res_lut = 395;
 	endcase
 end
 
@@ -81,15 +81,16 @@ reg [2:0] filter_step;
  * Remember that this gets turned into hardware, so these few lines easily take up most of the die space used
  * in each SID macro, not counting the LUTs
 */
-wire signed [31:0] temp1 = (filter_step == 0 ? {6'h00, res_lut} : cutoff_lut) * (filter_step == 2 ? high : band);
+wire signed [31:0] temp1 = (filter_step == 0 ? {6'h00, res_lut} : cutoff_lut) * (filter_step == 1 ? high : band);
 wire signed [31:0] temp2 = temp1 >>> 20;
-wire signed [31:0] band_low_next = (filter_step == 2 ? band : low) - temp2;
+wire signed [31:0] band_next = band - temp2;
+wire signed [31:0] low_next = low + temp2;
 
 wire signed [31:0] temp4 = temp1 >>> 10;
-wire signed [31:0] high_next = temp4 - low - {16'h0000, filt_in};
+wire signed [31:0] high_next = {16'h0000, filt_in} + temp4 + low;
 
 reg signed [31:0] sample_filtered;
-wire signed [31:0] sample_filtered_next = sample_filtered + (filter_step == 1 ? high : (filter_step == 2 ? low : band));
+wire signed [31:0] sample_filtered_next = sample_filtered + (filter_step == 1 ? -high : (filter_step == 2 ? -band : low));
 wire signed [31:0] sample_filtered_adj = sample_filtered >>> 1;
 
 assign sample_ready = filter_step == 0;
@@ -111,17 +112,17 @@ always @(posedge clk) begin
 				sample_buff <= 16384;
 			end
 			1: begin
-				low <= band_low_next;
+				band <= band_next;
 				if(hp) sample_filtered <= sample_filtered_next;
 				if(!filt_1) sample_buff <= sample_buff_next;
 			end
 			2: begin
-				band <= band_low_next;
-				if(lp) sample_filtered <= sample_filtered_next;
+				low <= low_next;
+				if(bp) sample_filtered <= sample_filtered_next;
 				if(!filt_2) sample_buff <= sample_buff_next;
 			end
 			3: begin
-				if(bp) sample_filtered <= sample_filtered_next;
+				if(lp) sample_filtered <= sample_filtered_next;
 				if(!filt_3 && !three_off) sample_buff <= sample_buff_next;
 			end
 			4: begin

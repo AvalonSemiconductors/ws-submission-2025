@@ -105,8 +105,6 @@ wire [63:0] xorshift_1 = xorshift_state ^ {xorshift_state[50:0], 13'h0000};
 wire [63:0] xorshift_2 = xorshift_1 ^ {7'h00, xorshift_state[63:7]};
 wire [63:0] xorshift_3 = xorshift_2 ^ {xorshift_state[46:0], 17'h00000};
 
-//TODO: ADC through SID R2R
-
 wire irupt = (uart_hb && uart_int_en) || t0irq || t1irq || t2irq;
 assign io_out[0] = !irupt;
 

@@ -14,8 +14,6 @@ module dram_controller(
 
 reg conf_is_a17;
 
-//TODO: additional A/DA lines on unused pads
-
 wire rst_n = io_in_buffered[2];
 wire reset = !rst_n || !rst_override_n;
 
@@ -45,10 +43,6 @@ assign io_out[40] = RLE;
 reg WLE;
 assign io_out[41] = WLE;
 
-//Unused: 4, 5, 6, 28
-assign io_out[28] = 1'b0;
-assign io_out[6:4] = 3'h5;
-
 //Inputs
 assign io_out[22:7] = 0;
 assign io_out[25:23] = 0;
@@ -64,6 +58,10 @@ wire [7:0] conf_val = address[7:0];
 reg [3:0] column_bits;
 reg page_mode_en;
 reg do_data_setup;
+
+//Unused: 4, 5, 6, 28
+assign io_out[28] = 1'b0;
+assign io_out[6:4] = {needs_refresh, page_mode_en, conf_is_a17};
 
 reg [8:0] column_mask;
 always @(*) begin

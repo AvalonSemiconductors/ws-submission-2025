@@ -744,152 +744,140 @@ module chip_top #(
     `endif
         .clk_i(clk_buffered),
         .rst_override_n(rst_override_n_secret_message),
-        .io_in_buffered(io_in_buffered[0]),
+        .io_in_buffered(bidir_PAD2CORE[0]),
         .io_out(io_out_secret_message)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_0(
+    gf180mcu_fd_io__asig_5p0 analog_0(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(sid_audio_0),
-        .PAD()
+        .ASIG5V(sid_audio_0)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_1(
+    gf180mcu_fd_io__asig_5p0 analog_1(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_4),
-        .PAD()
+        .ASIG5V(spare_analog_4)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_2(
+    gf180mcu_fd_io__asig_5p0 analog_2(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_3),
-        .PAD()
+        .ASIG5V(spare_analog_3)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_3(
+    gf180mcu_fd_io__asig_5p0 analog_3(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_2),
-        .PAD()
+        .ASIG5V(spare_analog_2)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_4(
+    gf180mcu_fd_io__asig_5p0 analog_4(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vic_luma),
-        .PAD()
+        .ASIG5V(vic_luma)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_5(
+    gf180mcu_fd_io__asig_5p0 analog_5(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(sid_audio_1),
-        .PAD()
+        .ASIG5V(sid_audio_1)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_6(
+    gf180mcu_fd_io__asig_5p0 analog_6(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vga_b),
-        .PAD()
+        .ASIG5V(vga_b)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_7(
+    gf180mcu_fd_io__asig_5p0 analog_7(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vic_chroma),
-        .PAD()
+        .ASIG5V(vic_chroma)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_8(
+    gf180mcu_fd_io__asig_5p0 analog_8(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vga_r),
-        .PAD()
+        .ASIG5V(vga_r)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_9(
+    gf180mcu_fd_io__asig_5p0 analog_9(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vga_g),
-        .PAD()
+        .ASIG5V(vga_g)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_10(
+    gf180mcu_fd_io__asig_5p0 analog_10(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_0),
-        .PAD()
+        .ASIG5V(spare_analog_0)
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0_fixed analog_11(
+    gf180mcu_fd_io__asig_5p0 analog_11(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_1),
-        .PAD()
+        .ASIG5V(spare_analog_1)
     );
     
     // Die ID - do not remove, necessary for tapeout

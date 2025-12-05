@@ -122,7 +122,6 @@ mc mc(
 	.preload_act_n(mc_io_out[16])
 );
 
-//TODO: test this
 reg [7:0] vga_col_sel_r;
 reg [7:0] vga_col_sel_g;
 reg [7:0] vga_col_sel_b;

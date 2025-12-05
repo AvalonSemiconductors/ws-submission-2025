@@ -11,7 +11,7 @@ module secret_message(
 	output [8:0] io_out
 );
 
-reg [7:0] pointer;
+reg [8:0] pointer;
 
 always @(posedge clk_i) begin
 	if(!rst_override_n || !io_in_buffered) begin
