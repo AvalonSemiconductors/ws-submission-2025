@@ -2,29 +2,20 @@ meta:
   version: 3
   flow: Chip
   substituting_steps:
-    OpenROAD.TapEndcapInsertion: null
     OpenROAD.RepairDesignPostGpl: null
-    Odb.ManualGlobalPlacement: null
-    OpenROAD.CTS: null
-    OpenROAD.STAMidPnr-1: null
     OpenROAD.ResizerTimingPostCTS: null
-    OpenROAD.STAMidPnr-2: null
-    Odb.DiodesOnPorts: null
-    OpenROAD.RepairAntennas: null
-    OpenROAD.STAMidPnr: null
-    OpenROAD.CheckAntennas: null
-    OpenROAD.FillInsertion: null
+    +OpenROAD.RepairAntennas: Odb.InsertECODiodes
 
 DESIGN_NAME: chip_top
 VERILOG_FILES:
 - dir::../src/chip_top.sv
 
 ROUTING_OBSTRUCTIONS: [["Metal4", 2450, 3850, 3145, 4427], ["Metal5", 2450, 3850, 3145, 4427],
-["Metal1", 2400, 2900, 3440, 3780],
-["Metal2", 2400, 2900, 3440, 3780],
-["Metal3", 2400, 2900, 3440, 3780],
-["Metal4", 2400, 2900, 3440, 3780],
-["Metal5", 2400, 2900, 3440, 3780],
+["Metal1", 2400, 2950, 3440, 3830],
+["Metal2", 2400, 2950, 3440, 3830],
+["Metal3", 2400, 2950, 3440, 3830],
+["Metal4", 2400, 2950, 3440, 3830],
+["Metal5", 2400, 2950, 3440, 3830],
 ["Metal1", 500, 2900, 1475, 3725],
 ["Metal2", 500, 2900, 1475, 3725],
 ["Metal3", 500, 2900, 1475, 3725],
@@ -162,7 +153,12 @@ DIE_AREA: [0, 0, 3932, 5122]
 CORE_AREA: [442, 442, 3490, 4680]
 
 RT_MAX_LAYER: Metal5
-DRT_ANTENNA_REPAIR_ITERS: 0
+DRT_ANTENNA_REPAIR_ITERS: 5
+DESIGN_REPAIR_TIE_FANOUT: true
+DIODE_ON_PORTS: both
+GRT_ANTENNA_ITERS: 15
+GRT_ANTENNA_MARGIN: 95
+DRT_ANTENNA_MARGIN: 95
 
 # PDN - Straps
 PDN_VWIDTH: 5
@@ -174,7 +170,7 @@ PDN_VPITCH: 75
 # PDN - Core ring
 PDN_CORE_RING: True
 PDN_MULTILAYER: True
-PDN_ENABLE_RAILS: False
+PDN_ENABLE_RAILS: True
 PDN_CFG: dir::pdn_cfg.tcl
 # Maximum metal width without slotting: 30um
 PDN_CORE_RING_VWIDTH: 25
@@ -193,10 +189,6 @@ PDN_CORE_HORIZONTAL_LAYER: Metal3
 MAGIC_GDS_FLATGLOB:
 # For contacts
 - "*_CDNS_*"
-# COMP and Poly2 filler cells need to be 
-# flattened to form a "filltrans" layer
-- "COMP_fill_cell"
-- "Poly2_fill_cell"
 # Foundry provided SRAMs
 - "*$$*"
 - "M1_N*"
@@ -230,6 +222,12 @@ MAGIC_GDS_FLATGLOB:
 - "*ppolyf_u_1k_6p0*"
 - "*XM*"
 - "*XR*"
+
+# Since we cannot meet the minimum density limit on Metal2,
+# move the dummy shapes to the active metal layer and ignore
+# DM.5_DM.7 and DM.4_DM.6
+KLAYOUT_FILLER_OPTIONS:
+  Metal2_ignore_active: true
 
 # Because we have multiple power pads for one power domain
 MAGIC_EXT_UNIQUE: notopports
@@ -287,7 +285,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/AS65x/runs/latest/final/lib/nom_tt_025C_5v00/as65x__nom_tt_025C_5v00.lib
     instances:
       as65x:
-        location: [2700, 2550]
+        location: [2825, 2550]
         orientation: N
   c64pla:
     gds:
@@ -341,7 +339,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/SID/runs/latest/final/lib/nom_tt_025C_5v00/sid__nom_tt_025C_5v00.lib
     instances:
       sid:
-        location: [2750, 1500]
+        location: [2825, 1500]
         orientation: N
   repeater:
     gds:
@@ -395,7 +393,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/GPIO/runs/latest/final/lib/nom_tt_025C_5v00/gpiochip__nom_tt_025C_5v00.lib
     instances:
       gpiochip:
-        location: [600, 2000]
+        location: [550, 2000]
         orientation: N
   dram_controller:
     gds:
@@ -476,7 +474,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/MiscStuff/runs/latest/final/lib/nom_tt_025C_5v00/misc__nom_tt_025C_5v00.lib
     instances:
       misc:
-        location: [1100, 1675]
+        location: [1100, 1625]
         orientation: N
   as65rv32:
     gds:
@@ -503,7 +501,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/65RV32/runs/latest/final/lib/nom_tt_025C_5v00/as65rv32__nom_tt_025C_5v00.lib
     instances:
       as65rv32:
-        location: [1700, 1675]
+        location: [1725, 1625]
         orientation: N
   fm:
     gds:
@@ -603,6 +601,17 @@ MACROS:
       dac10:
         location: [2550, 1350]
         orientation: N
+  gf180mcu_fd_io__asig_5p0_fixed:
+    gds:
+      - dir::../macros/Analog/AnalogPad/gds/gf180mcu_fd_io__asig_5p0_fixed.gds
+    lef:
+      - dir::../macros/Analog/AnalogPad/lef/gf180mcu_fd_io__asig_5p0_fixed.lef
+    pnl:
+      - dir::../macros/Analog/AnalogPad/verilog/gf180mcu_fd_io.v
+    nl:
+      - dir::../macros/Analog/AnalogPad/verilog/gf180mcu_fd_io.v
+    lib:
+      "*": dir::../macros/Analog/AnalogPad/lib/analog_pad.lib
   gf180mcu_ws_ip__id:
     gds:
       - dir::../ip/gf180mcu_ws_ip__id/gds/gf180mcu_ws_ip__id.gds
@@ -685,7 +694,7 @@ MACROS:
         - dir::../silicon_art/lunar_art_1.lib
     instances:
       lunar_art_1:
-        location: [2400, 2900]
+        location: [2400, 2950]
         orientation: N
   lunar_art_2:
     gds:
@@ -702,8 +711,12 @@ MACROS:
         location: [500, 2900]
         orientation: N
 
+FP_MACRO_HORIZONTAL_HALO: 20
+FP_MACRO_VERTICAL_HALO: 20
 FP_MACRO_HORIZONTAL_HALO: 5
 FP_MACRO_VERTICAL_HALO: 5
+
+GRT_ALLOW_CONGESTION: true
 
 # Make sure netgen doesn't create 'no_connect' nets
 # Not needed since netgen 1.5.303
@@ -726,3 +739,77 @@ MAGIC_EXT_ABSTRACT_CELLS:
 - tholin
 - lunar_art_1
 - lunar_art_2
+
+INSERT_ECO_DIODES:
+- target: secret_message/rst_override_n
+- target: sid/io_in_buffered[12]
+- target: misc/io_in_buffered[11]
+- target: as65x/io_in[14]
+- target: as65rv32/io_in[2]
+- target: as65x/io_in[2]
+- target: gpiochip/io_in[2]
+- target: repeater/io_in[2]
+- target: sid/gpiochip_sample_2[0]
+- target: sid/gpiochip_sample_2[1]
+- target: sid/gpiochip_sample_2[2]
+- target: sid/gpiochip_sample_2[3]
+- target: sid/gpiochip_sample_3[0]
+- target: sid/gpiochip_sample_3[1]
+- target: sid/gpiochip_sample_3[2]
+- target: sid/gpiochip_sample_3[3]
+- target: sid/gpiochip_sample_3[4]
+- target: sid/gpiochip_sample_3[5]
+- target: sid/gpiochip_sample_3[6]
+- target: repeater/io_in[1]
+- target: as65rv32/io_in[1]
+- target: as65x/io_in[1]
+- target: gpiochip/io_in[1]
+- target: ntsc/rst_override_n
+- target: dac0/D0
+- target: dac1/D0
+- target: dac2/D0
+- target: dac3/D0
+- target: dac4/D0
+- target: dac5/D0
+- target: dac6/D0
+- target: dac7/D0
+- target: dac8/D0
+- target: dac9/D0
+- target: dac10/D0
+- target: dac0/D1
+- target: dac1/D1
+- target: dac2/D1
+- target: dac3/D1
+- target: dac4/D1
+- target: dac5/D1
+- target: dac6/D1
+- target: dac7/D1
+- target: dac8/D1
+- target: dac9/D1
+- target: dac10/D1
+- target: dac0/D2
+- target: dac1/D2
+- target: dac2/D2
+- target: dac3/D2
+- target: dac4/D2
+- target: dac5/D2
+- target: dac6/D2
+- target: dac7/D2
+- target: dac8/D2
+- target: dac9/D2
+- target: dac10/D2
+- target: dac0/D3
+- target: dac1/D3
+- target: dac2/D3
+- target: dac3/D3
+- target: dac4/D3
+- target: dac5/D3
+- target: dac6/D3
+- target: dac7/D3
+- target: dac8/D3
+- target: dac9/D3
+- target: dac10/D3
+- target: repeater/io_in[13]
+- target: as65rv32/io_in[13]
+- target: as65x/io_in[13]
+- target: gpiochip/io_in[13]

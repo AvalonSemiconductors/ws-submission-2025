@@ -92,3 +92,5 @@ set_false_path -through [get_pins {*pad/OE}]
 set_false_path -through [get_pins {*pad/PU}]
 set_false_path -through [get_pins {*pad/PD}]
 set_false_path -through [get_pins {*pad/CS}]
+
+create_generated_clock -source [get_pin repeater/clk_i] -divide_by 1 repeater/clk_o

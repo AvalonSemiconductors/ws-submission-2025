@@ -29,6 +29,10 @@ module chip_top #(
     wire [NUM_BIDIR-1:0] bidir_CORE2PAD_PU;
     wire [NUM_BIDIR-1:0] bidir_CORE2PAD_PD;
     
+    wire [41:0] io_in_buffered;
+    wire [4:0] design_sel_buffered;
+    wire clk_buffered;
+    
     wire [6:0] const_zero;
     wire [4:0] const_one;
     
@@ -44,7 +48,7 @@ module chip_top #(
     wire spare_analog_2;
     wire spare_analog_3;
     wire spare_analog_4;
-
+    
     // Power / ground IO pad instances
 
     // South
@@ -217,6 +221,26 @@ module chip_top #(
             .PU     (bidir_CORE2PAD_PU[i]),
             .PD     (bidir_CORE2PAD_PD[i])
         );
+        /*(* keep *)
+        gf180mcu_fd_sc_mcu7t5v0__antenna extra_antenna (
+            `ifdef USE_POWER_PINS
+            .VNW    (VDD),
+            .VPW    (VSS),
+            .VDD    (VDD),
+            .VSS    (VSS),
+            `endif
+            .I(bidir_PAD2CORE[i])
+        );
+        (* keep *)
+        gf180mcu_fd_sc_mcu7t5v0__antenna extra_antenna_buffered (
+            `ifdef USE_POWER_PINS
+            .VNW    (VDD),
+            .VPW    (VSS),
+            .VDD    (VDD),
+            .VSS    (VSS),
+            `endif
+            .I(io_in_buffered[i])
+        );*/
     end
     endgenerate
     
@@ -236,12 +260,29 @@ module chip_top #(
             .PU     (const_one[i]),
             .PD     (const_zero[2+i])
         );
+        /*(* keep *)
+        gf180mcu_fd_sc_mcu7t5v0__antenna extra_antenna (
+            `ifdef USE_POWER_PINS
+            .VNW    (VDD),
+            .VPW    (VSS),
+            .VDD    (VDD),
+            .VSS    (VSS),
+            `endif
+            .I(design_sel_PAD2CORE[i])
+        );
+        (* keep *)
+        gf180mcu_fd_sc_mcu7t5v0__antenna extra_antenna_buffered (
+            `ifdef USE_POWER_PINS
+            .VNW    (VDD),
+            .VPW    (VSS),
+            .VDD    (VDD),
+            .VSS    (VSS),
+            `endif
+            .I(design_sel_buffered[i])
+        );*/
     end
     endgenerate
-    
-    wire [41:0] io_in_buffered;
-    wire [4:0] design_sel_buffered;
-    wire clk_buffered;
+
     
     repeater repeater(
     `ifdef USE_POWER_PINS
@@ -508,7 +549,7 @@ module chip_top #(
     `endif
         .clk_i(clk_PAD2CORE),
         .rst_override_n(rst_override_n_ntsc),
-        .io_in_buffered(io_in_buffered),
+        .io_in_buffered(io_in_buffered[41:35]),
         .io_out(io_out_ntsc),
         .sample_raw_1(sample_raw_ntsc)
     );
@@ -749,135 +790,147 @@ module chip_top #(
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_0(
+    gf180mcu_fd_io__asig_5p0_fixed analog_0(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(sid_audio_0)
+        .ASIG5V(sid_audio_0),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_1(
+    gf180mcu_fd_io__asig_5p0_fixed analog_1(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_4)
+        .ASIG5V(spare_analog_4),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_2(
+    gf180mcu_fd_io__asig_5p0_fixed analog_2(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_3)
+        .ASIG5V(spare_analog_3),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_3(
+    gf180mcu_fd_io__asig_5p0_fixed analog_3(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_2)
+        .ASIG5V(spare_analog_2),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_4(
+    gf180mcu_fd_io__asig_5p0_fixed analog_4(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vic_luma)
+        .ASIG5V(vic_luma),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_5(
+    gf180mcu_fd_io__asig_5p0_fixed analog_5(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(sid_audio_1)
+        .ASIG5V(sid_audio_1),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_6(
+    gf180mcu_fd_io__asig_5p0_fixed analog_6(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vga_b)
+        .ASIG5V(vga_b),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_7(
+    gf180mcu_fd_io__asig_5p0_fixed analog_7(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vic_chroma)
+        .ASIG5V(vic_chroma),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_8(
+    gf180mcu_fd_io__asig_5p0_fixed analog_8(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vga_r)
+        .ASIG5V(vga_r),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_9(
+    gf180mcu_fd_io__asig_5p0_fixed analog_9(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(vga_g)
+        .ASIG5V(vga_g),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_10(
+    gf180mcu_fd_io__asig_5p0_fixed analog_10(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_0)
+        .ASIG5V(spare_analog_0),
+        .PAD()
     );
     
     (* keep *)
-    gf180mcu_fd_io__asig_5p0 analog_11(
+    gf180mcu_fd_io__asig_5p0_fixed analog_11(
         `ifdef USE_POWER_PINS
         .DVDD   (VDD),
         .DVSS   (VSS),
         .VDD    (VDD),
         .VSS    (VSS),
         `endif
-        .ASIG5V(spare_analog_1)
+        .ASIG5V(spare_analog_1),
+        .PAD()
     );
     
     // Die ID - do not remove, necessary for tapeout

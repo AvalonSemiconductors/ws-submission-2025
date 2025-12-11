@@ -24,9 +24,9 @@ PL_RESIZER_HOLD_MAX_BUFFER_PCT: 100
 GRT_ALLOW_CONGESTION: true
 MAX_CAPACITANCE_CONSTRAINT: 0.4
 MAX_TRANSITION_CONSTRAINT: 3
-DRT_ANTENNA_REPAIR_ITERS: 3
+DRT_ANTENNA_REPAIR_ITERS: 5
 GRT_ANTENNA_MARGIN: 90
-GRT_ANTENNA_ITERS: 100
+GRT_ANTENNA_ITERS: 67
 RUN_CTS: true
 CLOCK_PORT: clk_i
 CLOCK_NET: clk_i
@@ -39,9 +39,18 @@ RT_MAX_LAYER: Metal4
 FP_PIN_ORDER_CFG: dir::pin_order.cfg
 FP_PDN_MULTILAYER: false
 FP_SIZING: absolute
+FP_IO_HLAYER: Metal3
+FP_IO_VLAYER: Metal4
 
 INSERT_ECO_DIODES:
 - target: fanout2197/I
+- target: fanout1886/I
+- target: fanout2024/I
+- target: fanout1287/I
+- target: _08391_/A2
+- target: fanout2041/I
+- target: fanout2118/I
+- target: fanout2052/I
 
 # Remove everything between this comment end the one below to disable use of the custom DFF cells
 LIB:

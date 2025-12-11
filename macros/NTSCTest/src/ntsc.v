@@ -13,7 +13,7 @@ module ntsc(
 `endif
 	input clk_i,
 	input rst_override_n,
-	input [41:0] io_in_buffered,
+	input [6:0] io_in_buffered,
 	
 	output [11:0] io_out,
 	
@@ -50,7 +50,7 @@ module ntsc(
 
 reg [7:0] frame_counter;
 
-wire reset = !(io_in_buffered[41] && rst_override_n);
+wire reset = !(io_in_buffered[6] && rst_override_n);
 reg [11:0] ntsc_luma;
 assign sample_raw_1 = reset ? 12'h000 : (12'hFFF - ntsc_luma);
 assign io_out = ntsc_luma;
@@ -61,9 +61,9 @@ reg active_period;
 reg vsync;
 reg v_backporch;
 
-wire [3:0] program_select = io_in_buffered[40:37];
-wire color_enable = io_in_buffered[36];
-wire pal_sel = io_in_buffered[35];
+wire [3:0] program_select = io_in_buffered[5:2];
+wire color_enable = io_in_buffered[1];
+wire pal_sel = io_in_buffered[0];
 reg [9:0] active_pixel; // 0 -> 751 ( / 2 = 375)
 reg [7:0] active_line; // 0 -> 245
 

@@ -32,3 +32,5 @@ PNR_SDC_FILE: dir::base.sdc
 SIGNOFF_SDC_FILE: dir::base.sdc
 STD_CELL_LIBRARY: gf180mcu_fd_sc_mcu9t5v0
 OUTPUT_CAP_LOAD: 200
+FP_IO_HLAYER: Metal3
+FP_IO_VLAYER: Metal4

@@ -9,7 +9,7 @@ meta:
 DESIGN_NAME: as65x
 VERILOG_FILES: ["dir::src/cpu.v", "dir::src/wrapped_cpu.v", "dir::src/multiplier.v"]
 CLOCK_PERIOD: 40
-DIE_AREA: [0, 0, 700, 300]
+DIE_AREA: [0, 0, 600, 280]
 RUN_MAGIC_DRC: true
 SYNTH_STRATEGY: DELAY 4
 PL_RESIZER_SETUP_SLACK_MARGIN: 0.15

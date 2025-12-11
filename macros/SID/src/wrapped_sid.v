@@ -80,4 +80,19 @@ sid_top sid_top(
 	.pot_y_oe(io_oe[1])
 );
 
+generate
+for (genvar i=1; i<42; i++) begin
+	(* keep *)
+	gf180mcu_fd_sc_mcu7t5v0__antenna input_tie (
+		`ifdef USE_POWER_PINS
+		.VNW    (VDD),
+		.VPW    (VSS),
+		.VDD    (VDD),
+		.VSS    (VSS),
+		`endif
+		.I(io_in_buffered[i])
+	);
+end
+endgenerate
+
 endmodule

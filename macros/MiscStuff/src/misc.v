@@ -168,6 +168,13 @@ reg [41:0] io_pd_sel;
 assign io_pd = io_pd_sel;
 always @(*) begin
 	case(design_sel_buffered)
+		0: begin
+			io_out_sel = 0;
+			io_oe_sel = 42'h3FFFFFFFFFF;
+			io_pu_sel = 0;
+			io_pd_sel = 0;
+			io_cs_sel = 0;
+		end
 		1: begin
 			io_out_sel = {8'h00, vga0_out, 26'h0};
 			io_oe_sel = {8'h00, 8'hFF, 26'h0};
@@ -210,7 +217,7 @@ always @(*) begin
 			io_pd_sel = {5'h0, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
 			io_cs_sel = {5'h1F, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
 		end
-		default: begin
+		7: begin
 			io_out_sel = 0;
 			io_oe_sel = 42'h3FFFFFFFFFF;
 			io_pu_sel = 0;
@@ -219,5 +226,30 @@ always @(*) begin
 		end
 	endcase
 end
+
+generate
+for (genvar i=1; i<6; i++) begin
+	(* keep *)
+	gf180mcu_fd_sc_mcu7t5v0__antenna input_tie_1 (
+		`ifdef USE_POWER_PINS
+		.VNW    (VDD),
+		.VPW    (VSS),
+		.VDD    (VDD),
+		.VSS    (VSS),
+		`endif
+		.I(io_in[i])
+	);
+	(* keep *)
+	gf180mcu_fd_sc_mcu7t5v0__antenna input_tie_2 (
+		`ifdef USE_POWER_PINS
+		.VNW    (VDD),
+		.VPW    (VSS),
+		.VDD    (VDD),
+		.VSS    (VSS),
+		`endif
+		.I(io_in[i+31])
+	);
+end
+endgenerate
 
 endmodule

@@ -178,6 +178,21 @@ assign io_out[31] = CASRAMn;
 assign io_out[41:32] = 0;
 assign io_oe = !io_in_buffered[32];
 
+generate
+for (genvar i=1; i<42; i++) begin
+	(* keep *)
+	gf180mcu_fd_sc_mcu7t5v0__antenna input_tie (
+		`ifdef USE_POWER_PINS
+		.VNW    (VDD),
+		.VPW    (VSS),
+		.VDD    (VDD),
+		.VSS    (VSS),
+		`endif
+		.I(io_in_buffered[i])
+	);
+end
+endgenerate
+
 endmodule
 
 module cond_delay(

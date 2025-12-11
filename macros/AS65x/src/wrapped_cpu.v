@@ -333,4 +333,19 @@ always @(negedge clk_i) begin
 	end
 end
 
+generate
+for (genvar i=1; i<42; i++) begin
+	(* keep *)
+	gf180mcu_fd_sc_mcu7t5v0__antenna input_tie (
+		`ifdef USE_POWER_PINS
+		.VNW    (VDD),
+		.VPW    (VSS),
+		.VDD    (VDD),
+		.VSS    (VSS),
+		`endif
+		.I(io_in[i])
+	);
+end
+endgenerate
+
 endmodule

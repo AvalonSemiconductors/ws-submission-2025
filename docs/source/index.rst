@@ -27,3 +27,4 @@ wafer.space Multi-Project Die
    :caption: Overview
    
    multiplexer
+   vga
