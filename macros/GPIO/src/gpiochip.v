@@ -160,6 +160,8 @@ always @(*) begin
 		45: D_out = PDA;
 		46: D_out = PDB;
 		
+		47: D_out = 105;
+		
 		48: D_out = memory[0];
 		49: D_out = memory[1];
 		50: D_out = memory[2];

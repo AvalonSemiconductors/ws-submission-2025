@@ -1,7 +1,8 @@
+`default_nettype wire
 `include "../../macros/AS65x/runs/latest/final/pnl/as65x.pnl.v"
 `include "../../macros/C64PLA/runs/latest/final/pnl/c64pla.pnl.v"
 `include "../../macros/Multiplexer/runs/latest/final/pnl/multiplexer.pnl.v"
-`include "../../src/chip_top.sv"
+`include "../../final/pnl/chip_top.pnl.v"
 `include "../../silicon_art/avali_logo.v"
 `include "../../silicon_art/aef2.v"
 `include "../../silicon_art/tholin.v"
@@ -18,3 +19,4 @@
 `include "../../macros/65RV32/runs/latest/final/pnl/as65rv32.pnl.v"
 `include "../../macros/Analog/AnalogPad/verilog/gf180mcu_fd_io.v"
 `include "../../macros/MiscStuff/gf180mcu_as_ex_mcu7t5v0/verilog/gf180mcu_as_ex_mcu7t5v0.v"
+`include "../../macros/SecretMessage/runs/latest/final/pnl/secret_message.pnl.v"

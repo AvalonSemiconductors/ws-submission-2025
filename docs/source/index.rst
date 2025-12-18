@@ -28,3 +28,7 @@ wafer.space Multi-Project Die
    
    multiplexer
    vga
+   misc
+   nanoproc
+   simplecpu
+   rv32

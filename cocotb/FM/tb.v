@@ -51,3 +51,5 @@ chip_top chip_top(
 );
 
 endmodule
+
+`default_nettype wire

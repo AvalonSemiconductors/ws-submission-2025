@@ -9,7 +9,7 @@ meta:
 # DO CHANGE
 DESIGN_NAME: secret_message
 VERILOG_FILES: ["dir::src/secret_message.v", "dir::src/message.v"]
-CLOCK_PERIOD: 35
+CLOCK_PERIOD: 25
 DIE_AREA: [0, 0, 250, 250]
 RUN_MAGIC_DRC: true
 SYNTH_STRATEGY: DELAY 4
@@ -24,14 +24,15 @@ DIODE_ON_PORTS: both
 RUN_CTS: true
 CLOCK_PORT: clk_i
 CLOCK_NET: clk_i
-PNR_SDC_FILE: dir::../base.sdc
-SIGNOFF_SDC_FILE: dir::../base.sdc
+PNR_SDC_FILE: dir::base.sdc
+SIGNOFF_SDC_FILE: dir::base.sdc
 VDD_NETS: ["VDD"]
 GND_NETS: ["VSS"]
 VERILOG_POWER_DEFINE: "USE_POWER_PINS"
 RT_MAX_LAYER: Metal4
 FP_PIN_ORDER_CFG: dir::pin_order.cfg
 FP_PDN_MULTILAYER: false
+STD_CELL_LIBRARY: gf180mcu_fd_sc_mcu9t5v0
 FP_SIZING: absolute
 FP_IO_HLAYER: Metal3
 FP_IO_VLAYER: Metal4

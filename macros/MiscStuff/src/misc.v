@@ -25,7 +25,7 @@ wire [41:0] io_in = io_in_buffered;
 
 wire [7:0] vga0_out;
 tt_um_rejunity_vga_logo vga0(
-	.ui_in(8'h00),
+	.ui_in(io_in[41:34]),
 	.uo_out(vga0_out),
 	.uio_in(8'h00),
 	.uio_out(),
@@ -107,11 +107,11 @@ nano nano(
 	.rst(design_sel_buffered != 4 || !rst_override_n || !io_in[0])
 );
 
-wire [16:0] mc_io_out;
+wire [20:0] mc_io_out;
 mc mc(
 	.clk_i(clk_i),
 	.rst_n(design_sel_buffered == 6 && rst_override_n && io_in[0]),
-	.loader_en(io_in[0]),
+	.loader_en(io_in[37]),
 	.run(io_in[9]),
 	.load(io_in[10]),
 	.preload_en(io_in[11]),
@@ -119,7 +119,8 @@ mc mc(
 	.port_out(mc_io_out[7:0]),
 	.load_in(io_in[19:12]),
 	.preload_addr(mc_io_out[15:8]),
-	.preload_act_n(mc_io_out[16])
+	.preload_act_n(mc_io_out[16]),
+	.extra_out(mc_io_out[20:17])
 );
 
 reg [7:0] vga_col_sel_r;
@@ -199,8 +200,8 @@ always @(*) begin
 		4: begin
 			io_out_sel = {nano_PA, nano_DO, nano_RW, nano_DS, nano_PSG, nano_int_ena, nano_int_ack, 1'b0, 7'h00, 6'hxx, 1'b0};
 			io_oe_sel = {11'h7FF, {8{nano_oe}}, 1'b1, 4'hF, 1'b1, 1'b1, 1'b1, 1'b0, ~nano_DC, 6'h3F, 1'b0};
-			io_pu_sel = 0;
-			io_pd_sel = {27'h0, 1'b1, 13'h0, 1'b1};
+			io_pu_sel = {27'h0, 1'b1, nano_DC, 7'h0};
+			io_pd_sel = {27'h0, 1'b0, 13'h0, 1'b1};
 			io_cs_sel = {27'h0, 1'b1, 13'h0, 1'b1};
 		end
 		5: begin
@@ -211,11 +212,11 @@ always @(*) begin
 			io_cs_sel = {8'hFF, 8'h00, 25'h0, 1'b1};
 		end
 		6: begin
-			io_out_sel = {5'h0, mc_io_out[16:8], 19'h0, mc_io_out[7:0], 1'b0};
-			io_oe_sel = {5'h0, 9'h1FF, 19'h0, 8'hFF, 1'b0};
-			io_pu_sel = {5'h1F, 37'h0};
-			io_pd_sel = {5'h0, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
-			io_cs_sel = {5'h1F, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
+			io_out_sel = {mc_io_out[20:17], 1'b0, mc_io_out[16:8], 19'h0, mc_io_out[7:0], 1'b0};
+			io_oe_sel = {4'hF, 1'b0, 9'h1FF, 19'h0, 8'hFF, 1'b0};
+			io_pu_sel = 0;
+			io_pd_sel = {4'h0, 1'b1, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
+			io_cs_sel = {4'b0, 1'b1, 9'h0, 19'h7FFFF, 8'h00, 1'b1};
 		end
 		7: begin
 			io_out_sel = 0;
@@ -228,7 +229,7 @@ always @(*) begin
 end
 
 generate
-for (genvar i=1; i<6; i++) begin
+for (genvar i=1; i<7; i++) begin
 	(* keep *)
 	gf180mcu_fd_sc_mcu7t5v0__antenna input_tie_1 (
 		`ifdef USE_POWER_PINS
@@ -247,7 +248,7 @@ for (genvar i=1; i<6; i++) begin
 		.VDD    (VDD),
 		.VSS    (VSS),
 		`endif
-		.I(io_in[i+31])
+		.I(io_in[i+30])
 	);
 end
 endgenerate

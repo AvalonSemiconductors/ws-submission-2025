@@ -8,7 +8,7 @@ meta:
 
 DESIGN_NAME: as65x
 VERILOG_FILES: ["dir::src/cpu.v", "dir::src/wrapped_cpu.v", "dir::src/multiplier.v"]
-CLOCK_PERIOD: 40
+CLOCK_PERIOD: 30
 DIE_AREA: [0, 0, 600, 280]
 RUN_MAGIC_DRC: true
 SYNTH_STRATEGY: DELAY 4
@@ -32,3 +32,4 @@ RT_MAX_LAYER: Metal4
 FP_PIN_ORDER_CFG: dir::pin_order.cfg
 FP_PDN_MULTILAYER: false
 FP_SIZING: absolute
+GRT_ALLOW_CONGESTION: true

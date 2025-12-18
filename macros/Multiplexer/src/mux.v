@@ -95,7 +95,7 @@ always @(*) begin
 		io_oe_sel = io_oe_65rv32;
 		io_out_sel = io_out_65rv32;
 		io_cs_sel = select_6502 ? {31'h0, 1'b1, 1'b0, 2'b11, 7'h0} : {31'h0, 2'b11, 4'h0, 1'b1, 4'h0};
-		io_pd_sel = 0;
+		io_pd_sel = {12'h0, 1'b1, 29'h0};
 		io_pu_sel = select_6502 ? {14'h0, 1'b1, 12'h0, 1'b1, 8'h0, 1'b1, 2'h1, 1'b1, 1'b0, 1'b1} : {11'h0, !io_oe_65rv32[30], 2'b0, 1'b1, 14'h0, 1'b1, 3'h0, 2'b11, 1'b0, 1'b1, 5'h0};
 	end else if(is_misc) begin
 		io_oe_sel = io_oe_misc;
@@ -135,7 +135,7 @@ always @(*) begin
 			end
 			5'b11001: begin
 				io_out_sel = io_out_dram_controller;
-				io_oe_sel = {1'b1, 1'b1, 1'b1, 1'b1, 1'b1, 1'b1, 1'b1, 6'h3F, 1'b0, 2'b11, 3'b0, 16'h0, 3'h7, 1'b0, 1'b0, 1'b1, 1'b0};
+				io_oe_sel = {1'b1, 1'b1, 1'b1, 1'b1, 1'b1, 1'b1, 1'b1, 6'h3F, 1'b1, 2'b11, 3'b0, 16'h0, 3'h7, 1'b0, 1'b0, 1'b1, 1'b0};
 				io_cs_sel = 0;
 				io_pd_sel = {13'h0, 1'b1, 24'h0, 1'b1, 2'b0, 1'b1};
 				io_pu_sel = {16'h0, 3'b111, 23'h0};

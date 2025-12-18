@@ -10,6 +10,7 @@ VERILOG_SOURCES += $(PDK_ROOT)/gf180mcuD/libs.ref/gf180mcu_fd_io/verilog/gf180mc
 VERILOG_SOURCES += $(PDK_ROOT)/gf180mcuD/libs.ref/gf180mcu_fd_io/verilog/gf180mcu_ws_io.v
 VERILOG_SOURCES += $(PDK_ROOT)/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/verilog/primitives.v
 VERILOG_SOURCES += $(PDK_ROOT)/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu7t5v0/verilog/gf180mcu_fd_sc_mcu7t5v0.v
+VERILOG_SOURCES += $(PDK_ROOT)/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu9t5v0/verilog/primitives.v
 VERILOG_SOURCES += $(PDK_ROOT)/gf180mcuD/libs.ref/gf180mcu_fd_sc_mcu9t5v0/verilog/gf180mcu_fd_sc_mcu9t5v0.v
 VERILOG_SOURCES += $(PWD)/../../ip/gf180mcu_ws_ip__id/vh/gf180mcu_ws_ip__id.v
 VERILOG_SOURCES += $(PWD)/../../ip/gf180mcu_ws_ip__logo/vh/gf180mcu_ws_ip__logo.v

@@ -7,14 +7,14 @@ module secret_message(
 `endif
 	input clk_i,
 	input rst_override_n,
-	input io_in_buffered,
+	input io_in,
 	output [8:0] io_out
 );
 
 reg [8:0] pointer;
 
 always @(posedge clk_i) begin
-	if(!rst_override_n || !io_in_buffered) begin
+	if(!rst_override_n || !io_in) begin
 		pointer <= 0;
 	end else begin
 		pointer <= pointer + 1;

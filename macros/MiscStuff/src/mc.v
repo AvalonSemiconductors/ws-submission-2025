@@ -11,13 +11,16 @@ module mc(
 	output reg [7:0] port_out,
 	input [7:0] load_in,
 	output [7:0] preload_addr,
-	output preload_act_n
+	output preload_act_n,
+	output [3:0] extra_out
 );
 
 reg [7:0] PC;
 reg [7:0] A;
 reg [7:0] memory [63:0];
 reg [3:0] ireg;
+reg [7:0] input_buffered;
+assign extra_out = ireg;
 
 wire is_branch = ireg[2:0] == 3'b101;
 wire is_store = ireg == 4'h4;
@@ -54,6 +57,7 @@ always @(posedge clk_i) begin
 		ireg <= 0;
 		state <= 0;
 		preloading <= preload_en;
+		input_buffered <= 0;
 	end else begin
 		load_edge <= load;
 		if(preloading) begin
@@ -76,9 +80,12 @@ always @(posedge clk_i) begin
 					if(should_branch) PC <= ALU_out;
 				end else if(is_store) memory[memory[PC]] <= A;
 				else if(is_out) port_out <= A;
-				else if(is_in) A <= port_in;
+				else if(is_in) A <= input_buffered;
 				else A <= ALU_out;
-			end else ireg <= memory[PC][3:0];
+			end else begin
+				ireg <= memory[PC][3:0];
+				input_buffered <= port_in;
+			end
 		end
 	end
 end

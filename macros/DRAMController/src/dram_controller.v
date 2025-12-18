@@ -60,7 +60,8 @@ reg page_mode_en;
 reg do_data_setup;
 
 //Unused: 4, 5, 6, 28
-assign io_out[28] = 1'b0;
+reg [22:0] blinker;
+assign io_out[28] = blinker[22];
 assign io_out[6:4] = {needs_refresh, page_mode_en, conf_is_a17};
 
 reg [8:0] column_mask;
@@ -166,6 +167,7 @@ always @(posedge clk_i) begin
 		pause_on_refresh <= 0;
 		ras_release_targ <= 0;
 	end else begin
+		blinker <= blinker + 1;
 		if(!needs_refresh && initial_config) refresh_timer <= refresh_timer + 1;
 		if(refresh_interval == refresh_timer) begin
 			needs_refresh <= 1'b1;
@@ -298,7 +300,7 @@ always @(posedge clk_i) begin
 end
 
 generate
-for (genvar i=1; i<42; i++) begin
+for (genvar i=0; i<42; i++) begin
 	(* keep *)
 	gf180mcu_fd_sc_mcu7t5v0__antenna input_tie (
 		`ifdef USE_POWER_PINS
@@ -308,6 +310,16 @@ for (genvar i=1; i<42; i++) begin
 		.VSS    (VSS),
 		`endif
 		.I(io_in_buffered[i])
+	);
+	(* keep *)
+	gf180mcu_fd_sc_mcu7t5v0__antenna output_tie (
+		`ifdef USE_POWER_PINS
+		.VNW    (VDD),
+		.VPW    (VSS),
+		.VDD    (VDD),
+		.VSS    (VSS),
+		`endif
+		.I(io_out[i])
 	);
 end
 endgenerate

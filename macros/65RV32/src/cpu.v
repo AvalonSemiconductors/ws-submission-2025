@@ -240,6 +240,12 @@ reg wfi;
 reg mie;
 reg mdt;
 reg mpie;
+reg mtie;
+reg meie;
+reg mtip;
+reg meip;
+reg [31:0] mscratch;
+reg [3:0] mcause;
 
 //Peripherals
 wire uart_hb;
@@ -254,13 +260,6 @@ reg [63:0] cycle;
 reg [63:0] instret;
 reg [37:0] rng;
 
-reg mtie;
-reg meie;
-reg mtip;
-reg meip;
-reg [31:0] mscratch;
-reg [3:0] mcause;
-
 reg O;
 wire [11:0] csr_id = ireg[31:20];
 wire [31:0] csr_wval_raw = funct3[2] ? {27'h0, rs1Id} : rs1;
@@ -273,7 +272,7 @@ always @(*) begin
 	case(csr_id)
 		default: csr_rval = 32'h00000000;
 		12'hF11: csr_rval = 0; //mvendorid
-		12'h301: csr_rval = 32'h40401100; //misa (TODO: set bit 0 if A ISA is ever implemented)
+		12'h301: csr_rval = 32'h40401101; //misa
 		12'hF14: csr_rval = 0; //mhartid
 		12'hF12: csr_rval = 32'h82500621; //marchid
 		12'hF13: csr_rval = 32'h100; //mimpid, v1.0.0
@@ -282,7 +281,7 @@ always @(*) begin
 		12'hFC7: csr_rval = rng[34:3];
 		12'h740: csr_rval = mnscratch;
 		12'h741: csr_rval = mnepc;
-		12'h742: csr_rval = 32'h80000000; //mncause - always an interrupt on the NMI pin (TODO: maybe do add a break instruction?)
+		12'h742: csr_rval = 32'h80000000; //mncause - always an interrupt on the NMI pin
 		12'h744: csr_rval = {28'h0, NMIE, 3'b000};
 		12'hB00: csr_rval = cycle[31:0];
 		12'hB80: csr_rval = cycle[63:32];
@@ -502,7 +501,7 @@ always @(negedge PH0IN) begin
 										end
 										12'hBC3: timer <= csr_wval;
 										12'hBC4: timermatch <= csr_wval;
-										12'h139: begin //Silence simulator warning for UTX
+										12'h139: begin //Silence simulator warnings
 										end
 										12'hFC5: begin
 										end
@@ -623,9 +622,6 @@ always @(negedge PH0IN) begin
 					state <= FETCH;
 				end
 				ATOMIC: begin
-				`ifdef SIM
-				$display("Atomic op exec");
-				`endif
 					case(funct5)
 						default: mem_buffer <= rs2;
 						0: mem_buffer <= plus;

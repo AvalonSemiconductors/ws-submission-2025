@@ -785,7 +785,7 @@ module chip_top #(
     `endif
         .clk_i(clk_buffered),
         .rst_override_n(rst_override_n_secret_message),
-        .io_in_buffered(bidir_PAD2CORE[0]),
+        .io_in(bidir_PAD2CORE[0]),
         .io_out(io_out_secret_message)
     );
     

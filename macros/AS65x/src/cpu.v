@@ -35,7 +35,9 @@ module cpu65(
 	input sync_irqs,
 	input sync_rdy,
 	input rdy_writes,
-	input do_latency
+	input do_latency,
+	
+	output bonus_output
 );
 
 `ifdef BENCH
@@ -87,6 +89,7 @@ reg C;
 reg E;
 //Only IRQ and NMI push B as 0
 wire [7:0] PS_combined = {N, V, 1'b1, 1'b1, D, I, Z, C};
+assign bonus_output = I;
 
 // Vectors:
 // $FFFA - NMI

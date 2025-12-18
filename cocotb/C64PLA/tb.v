@@ -98,3 +98,5 @@ dodgypla_core dodgypla_core(
 assign matching = dodgy_f == pla_f;
 
 endmodule
+
+`default_nettype wire

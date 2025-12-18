@@ -108,6 +108,7 @@ wire MLn;
 wire VPn;
 wire [7:0] D_o;
 wire D_oe;
+wire bonus_output;
 
 wire [7:0] D_i_6502 = {
 	io_in[33],
@@ -154,7 +155,7 @@ wire [41:0] io_out_6502 = {
 	A_o[15],
 	A_o[14],
 	A_o[13],
-	1'b0,
+	bonus_output,
 	A_o[12],
 	1'b0,
 	A_o[11],
@@ -192,7 +193,7 @@ wire [41:0] oe_6502 = {
 	A_oe,
 	A_oe,
 	A_oe,
-	1'b0,
+	1'b1,
 	A_oe,
 	1'b0,
 	{12{A_oe}},
@@ -313,7 +314,8 @@ cpu65 cpu(
 	.sync_irqs(!(select_6502 ? io_in[14] : io_in[8])), //Turned ON by bonding to ground
 	.sync_rdy(io_in[27]), //Turned OFF by bonding to ground
 	.rdy_writes(!(select_6502 ? io_in[2] : io_in[7])), //Turned ON by bonding to ground
-	.do_latency(select_6502 ? io_in[3] : io_in[5]) //Turned OFF by bonding to ground
+	.do_latency(select_6502 ? io_in[3] : io_in[5]), //Turned OFF by bonding to ground
+	.bonus_output(bonus_output)
 );
 
 always @(negedge clk_i) begin
@@ -334,7 +336,7 @@ always @(negedge clk_i) begin
 end
 
 generate
-for (genvar i=1; i<42; i++) begin
+for (genvar i=0; i<42; i++) begin
 	(* keep *)
 	gf180mcu_fd_sc_mcu7t5v0__antenna input_tie (
 		`ifdef USE_POWER_PINS

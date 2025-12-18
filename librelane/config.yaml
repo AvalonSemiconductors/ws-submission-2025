@@ -5,6 +5,10 @@ meta:
     OpenROAD.RepairDesignPostGpl: null
     OpenROAD.ResizerTimingPostCTS: null
     +OpenROAD.RepairAntennas: Odb.InsertECODiodes
+    KLayout.DRC: null
+    Checker.KLayoutDRC: null
+    Magic.DRC: null
+    Checker.MagicDRC: null
 
 DESIGN_NAME: chip_top
 VERILOG_FILES:
@@ -258,7 +262,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/Multiplexer/runs/latest/final/lib/nom_tt_025C_5v00/multiplexer__nom_tt_025C_5v00.lib
     instances:
       multiplexer:
-        location: [1600, 2875]
+        location: [1600, 2870]
         orientation: N
   as65x:
     gds:
@@ -393,7 +397,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/GPIO/runs/latest/final/lib/nom_tt_025C_5v00/gpiochip__nom_tt_025C_5v00.lib
     instances:
       gpiochip:
-        location: [550, 2000]
+        location: [550, 2003]
         orientation: N
   dram_controller:
     gds:
@@ -474,7 +478,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/MiscStuff/runs/latest/final/lib/nom_tt_025C_5v00/misc__nom_tt_025C_5v00.lib
     instances:
       misc:
-        location: [1100, 1625]
+        location: [1100, 1630]
         orientation: N
   as65rv32:
     gds:
@@ -501,7 +505,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/65RV32/runs/latest/final/lib/nom_tt_025C_5v00/as65rv32__nom_tt_025C_5v00.lib
     instances:
       as65rv32:
-        location: [1725, 1625]
+        location: [1725, 1620]
         orientation: N
   fm:
     gds:
@@ -555,7 +559,7 @@ MACROS:
       nom_tt_025C_5v00: dir::../macros/SecretMessage/runs/latest/final/lib/nom_tt_025C_5v00/secret_message__nom_tt_025C_5v00.lib
     instances:
       secret_message:
-        location: [700, 1625]
+        location: [700, 1623]
         orientation: N
   r2r_dac_buffered:
     gds:

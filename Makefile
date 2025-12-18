@@ -5,7 +5,7 @@ TOP = chip_top
 
 PDK_ROOT ?= $(MAKEFILE_DIR)/gf180mcu_pdk
 PDK ?= gf180mcuD
-PDK_TAG ?= 1.6.4
+PDK_TAG ?= 1.6.6
 
 .DEFAULT_GOAL := help
 

@@ -1,0 +1,214 @@
+.. _rv32:
+
+65RV32
+======
+
+The 65RV32 is a RISC-V, rv32ima_zicsr_smnmi processor with some built-in peripherals that is pinout and bus-signaling compatible with either the MOS 6502 or 6510 microprocessors (selectable). It features the same 8-bit databus, but optionally expands the address bus to its full 32-bits. Both NMI and regular interrupt requests function mostly as described in RISC-V specs, but are instead vectored by reading the interrupt handler address from memory in the same way as it is done by the 6502/6510 microprocessors.
+
+Two pad-out configurations are available. Project ID ``'b01000`` selects the 65RV32 with 6510-compatible pinout while ``'b01001`` selects the 65RV32 with 6502-compatible pinout, including the 6-bit GPIO port.
+
+Special note: this design is clocked on the **falling edge** of the input clock signal.
+
+---------------
+Pad Assignments
+---------------
+
+.. list-table:: Pad description (6502-compatible)
+    :name: rv32-6502-pad-description
+    :header-rows: 1
+
+    * - Pad
+      - Name
+      - Type
+      - Summary
+    * - ``bidir[0]``
+      - ``AEC``
+      - I (PU)
+      - When low, forcefully tri-states the address and data buses as well as the ``RWn`` control signal ( this does not pause the processor)
+    * - ``bidir[1]``
+      - ``MLn``
+      - O
+      - Indicates that a read-modify-write cycle is in progress (i.e. atomic instruction)
+    * - ``bidir[2]``
+      - Disable write pauses
+      - I (PU)
+      - Changes the behavior of the ``RDY`` pin. When low, ``RDY`` can no longer extend memory writes, only reads, as in the original 6502/6510 processors
+    * - ``bidir[3]``
+      - Half write cycle
+      - I (PU)
+      - When high, the data bus is only an output for half a clock period on write cycles, instead of a full clock period, as in the original 6502/6510 processors
+    * - ``bidir[4]``
+      - TXD
+      - O
+      - Transmit line of the built-in UART
+    * - ``bidir[5]``
+      - ``SOb``/``RXD``
+      - I (PU)
+      - A low level on this pin sets the ``O`` flag in the ``cpuconf`` CSR if ``uart_reloc`` in the same CSR is clear. If the bit is set, it is the same as ``RXD``
+    * - ``bidir[6]``
+      - ``PH2OUT``
+      - O
+      - Phi2 clock output (inverse of input clock)
+    * - ``bidir[7]``
+      - ``RESn``
+      - I
+      - Active-low reset input
+    * - ``bidir[8]``
+      - ``RDY``
+      - I
+      - Input pin that, while low, pauses the processor during a memory access, forcing it to wait for slower memory
+    * - ``bidir[9]``
+      - ``PH1OUT``/``TXD``
+      - O
+      - Phi1 clock output if the ``uart_reloc`` bit in ``cpuconf`` is clear, same as ``TXD`` if the bit is set
+    * - ``bidir[10]``
+      - ``IRQn``
+      - I
+      - Low-level-sensitive external interrupt input
+    * - ``bidir[11]``
+      - ``ALE``
+      - O
+      - Address Latch Enable output which pulses high when the high-order address bits are presented on ``A`` in extended bus mode
+    * - ``bidir[12]``
+      - ``NMIn``
+      - I
+      - Non-maskable interrupt trigger, falling-edge triggered
+    * - ``bidir[13]``
+      - ``SYNC``
+      - O
+      - Status output indicating that the current bus cycle is an instruction fetch in-progress
+    * - ``bidir[14]`` ¹
+      - ``RXD`` ¹
+      - I (PU)
+      - Receive line of the built-in UART
+    * - ``bidir[26:15]``
+      - ``A[11:0]``
+      - O
+      - Address bus outputs, multiplexed in extended bus mode
+    * - ``bidir[27]``
+      - Sync ``RDY``
+      - I (PU)
+      - If high, the ``RDY`` pin is additionally buffered through a latch and synchronized to the **rising edge** of the clock
+    * - ``bidir[28]``
+      - ``A[12]``
+      - O
+      - Part of the address bus outputs
+    * - ``bidir[29]``
+      - No Connect
+      - NC
+      - Unused
+    * - ``bidir[32:30]``
+      - ``A[15:13]``
+      - O
+      - Part of the address bus outputs
+    * - ``bidir[40:33]``
+      - ``D[0:7]``
+      - IO
+      - Bi-directional data bus (note reversed bit order compared to pad numbering)
+    * - ``bidir[41]``
+      - ``RWn``
+      - O
+      - Indicates if the current bus cycle is a read (high) or a write (low)
+
+.. list-table:: Pad description (6510-compatible)
+    :name: rv32-6510-pad-description
+    :header-rows: 1
+
+    * - Pad
+      - Name
+      - Type
+      - Summary
+    * - ``bidir[0]``
+      - ``D[1]``
+      - IO
+      - Bi-directional data bus
+    * - ``bidir[1]``
+      - ``D[0]``
+      - IO
+      - Bi-directional data bus
+    * - ``bidir[2]``
+      - ``RWn``
+      - O
+      - Indicates if the current bus cycle is a read (high) or a write (low)
+    * - ``bidir[3]``
+      - ``PH1OUT``
+      - O
+      - Phi1 clock output
+    * - ``bidir[4]``
+      - ``RESn``
+      - I
+      - Active-low reset input
+    * - ``bidir[5]``
+      - Half write cycle
+      - I (PU)
+      - When high, the data bus is only an output for half a clock period on write cycles, instead of a full clock period, as in the original 6502/6510 processors
+    * - ``bidir[6]``
+      - TXD
+      - O
+      - Transmit line of the built-in UART
+    * - ``bidir[7]``
+      - Disable write pauses
+      - I (PU)
+      - Changes the behavior of the ``RDY`` pin. When low, ``RDY`` can no longer extend memory writes, only reads, as in the original 6502/6510 processors
+    * - ``bidir[8]`` ¹
+      - ``RXD`` ¹
+      - I (PU)
+      - Receive line of the built-in UART
+    * - ``bidir[9]``
+      - ``RDY``
+      - I
+      - Input pin that, while low, pauses the processor during a memory access, forcing it to wait for
+    * - ``bidir[10]``
+      - ``IRQn``
+      - I
+      - Low-level-sensitive external interrupt input
+    * - ``bidir[11]``
+      - ``NMIn``
+      - I
+      - Non-maskable interrupt trigger, falling-edge triggered
+    * - ``bidir[12]``
+      - ``AEC``
+      - I (PU)
+      - When low, forcefully tri-states the address and data buses as well as the ``RWn`` control signal ( this does not pause the processor)
+    * - ``bidir[26:13]``
+      - ``A[13:0]``
+      - O
+      - Address bus outputs, multiplexed in extended bus mode
+    * - ``bidir[27]``
+      - Sync ``RDY``
+      - I (PU)
+      - If high, the ``RDY`` pin is additionally buffered through a latch and synchronized to the clock
+    * - ``bidir[29:28]``
+      - ``A[15:14]``
+      - O
+      - Part of the address bus outputs
+    * - ``bidir[30]``
+      - ``P[5]``/``RXD``
+      - IO (PU)
+      - GPIO port bit 5 if ``uart_reloc`` in the ``cpuconf`` CSR is clear. If the bit is set, it is the same as ``RXD``
+    * - ``bidir[31]``
+      - ``P[4]``/``RXD``
+      - IO
+      - GPIO port bit 4 if ``uart_reloc`` in the ``cpuconf`` CSR is clear. If the bit is set, it is the same as ``TXD``
+    * - ``bidir[34:32]``
+      - ``P[1:3]``
+      - IO
+      - Bits 1 through 3 of the GPIO port
+    * - ``bidir[35]``
+      - ``P[0]``/``ALE``
+      - IO
+      - Address Latch Enable output if in extended bus mode, GPIO port bit 0 otherwise
+    * - ``bidir[41:36]``
+      - ``D[2:7]``
+      - IO
+      - Bi-directional data bus
+
+¹This pin acts as ``RXD`` after reset. However, when reset is released, on the first falling clock edge, its state (high or low) is latched and used as another configuration option: "Sync IRQs". If low upon reset being released, the ``IRQn`` and ``NMIn`` inputs are henceforth internally buffered through latches on every falling clock edge.
+
+----------------
+Intended Pinouts
+----------------
+
+The pad-out of this design was carefully selected to allow bonding to DIP-40-compatible COB PCBs or DIP-40 ceramic carriers. The intended pinouts are shown below. Just how the project selection pins are intended to be selectively bonded to the ground plane inside the package, the various configuration pins (such as ``bidir[27]`` on either pad-out option) are also pulled high by default and may be bonded to ground selectively.
+
+

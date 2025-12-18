@@ -7,7 +7,7 @@ module nano(
 	input clk,			//Clock input
 	output [10:0] PA,	//Program Address
 	//inout [6:0] DC,		//Direct Control I/O
-	output reg [6:0] DC_out,
+	output [6:0] DC_out,
 	input [6:0] DC_in,
 	output INT_ENA,	//Interrupt Enabled
 	input INT_REQ,		//Interrupt Request
@@ -32,13 +32,6 @@ reg [7:0] DC_latch;
 assign DC_out = DC_latch[6:0];
 
 assign PA = PC;
-//assign DC[0] = DC_latch[0] ? 1'bz : 1'b0;
-//assign DC[1] = DC_latch[1] ? 1'bz : 1'b0;
-//assign DC[2] = DC_latch[2] ? 1'bz : 1'b0;
-//assign DC[3] = DC_latch[3] ? 1'bz : 1'b0;
-//assign DC[4] = DC_latch[4] ? 1'bz : 1'b0;
-//assign DC[5] = DC_latch[5] ? 1'bz : 1'b0;
-//assign DC[6] = DC_latch[6] ? 1'bz : 1'b0;
 assign INT_ENA = DC_latch[7];
 
 reg cycle;
@@ -79,7 +72,7 @@ assign DS = cycle && io_op ? instr[3:0] : 4'hF;
 assign RW = cycle && io_op ? io_out : 1'b0;
 assign D_out = ACC;
 assign D_oe = cycle && is_OTA;
-assign PSG = ~(cycle && (is_INA || is_OTA));
+assign PSG = (~(cycle && (is_INA || is_OTA))) & !clk;
 
 wire mag_comp = instr[7:3] == 5'b00001;
 wire is_skip = mag_comp || instr[7:4] == 4'b0001 || instr[7:4] == 4'b0011;
@@ -225,7 +218,7 @@ always @(posedge clk) begin
 			if(is_skip && should_skip) begin
 				PC <= PC + 2;
 			end
-			if(INT_REQ && INT_ENA) begin
+			if(!INT_REQ) begin
 				INT_ACK <= 1'b1;
 			end
 		end else begin
