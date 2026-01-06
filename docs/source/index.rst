@@ -32,3 +32,10 @@ wafer.space Multi-Project Die
    nanoproc
    simplecpu
    rv32
+   fm
+   ntsc
+   dramcontroller
+   gpio
+   sid
+   as65cxx
+   pla

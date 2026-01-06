@@ -32,23 +32,23 @@ Note that all design selection pads have internal pull-ups. For cases where proj
 Address  Name
 =======  =====================================
 'b00000  All pads output low
-'b00001  VGA Demo - TT Logo
-'b00010  VGA Demo - wafer.space screensaver
-'b00011  Hellorld & Diceroll & LED Blinker
-'b00100  HP Nanoprocessor replica
-'b00101  VGA Demo - 24-bit color test
-'b00110  Simple 8-bit CPU
+'b00001  `VGA Demo - TT Logo </vga.html>`__
+'b00010  `VGA Demo - wafer.space screensaver </vga.html>`__
+'b00011  `Hellorld & Diceroll & LED Blinker </misc.html>`__
+'b00100  `HP Nanoprocessor replica </nanoproc.html>`__
+'b00101  `VGA Demo - 24-bit color test </vga.html#bit-color-vga-demo>`__
+'b00110  `Simple 8-bit CPU </simplecpu.html>`__
 'b00111  All pads output low
-'b01000  RV32IMA core (6510-compatible pinout)
-'b01001  RV32IMA core (6502-compatible pinout)
-'b10000  SID 2 (FM Synth)
+'b01000  `RV32IMA core (6510-compatible pinout) </rv32.html>`__
+'b01001  `RV32IMA core (6502-compatible pinout) </rv32.html>`__
+'b10000  `SID 2 (FM Synth) </fm.html>`__
 'b10100  :strikethrough:`Secret Message` Nothing
-'b11000  NTSC Test signal generator
-'b11001  Retro DRAM Controller
-'b11010  Retro GPIO Chip
-'b11011  SID Replica
-'b11100  6502 core (6510-compatible pinout)
-'b11101  6502 core (6502-compatible pinout)
-'b11110  C64 PLA Replica
+'b11000  `NTSC Test signal generator </ntsc.html>`__
+'b11001  `Retro DRAM Controller </dramcontroller.html>`__
+'b11010  `Retro GPIO Chip </gpio.html>`__
+'b11011  `SID Replica </sid.html>`__
+'b11100  `6502 core (6510-compatible pinout) </as65cxx.html>`__
+'b11101  `6502 core (6502-compatible pinout) </as65cxx.html>`__
+'b11110  `C64 PLA Replica </pla.html>`__
 'b11111  All pads high-impedance
 =======  =====================================

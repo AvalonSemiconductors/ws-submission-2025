@@ -11,6 +11,7 @@ Next is "LED Blinker" which toggles a number of output pins at different rates.
 
 Lastly, "Hellorld!" generates UART frames at 9600 baud when clocked at 10MHz.
 
+---------------
 Pad Assignments
 ---------------
 

@@ -23,7 +23,7 @@ Pad Assignments
       - Active low reset input
     * - ``bidir[13:7]``
       - ``DC[6:0]``
-      - O (open drain)
+      - IO (open drain)
       - Last-significant 7 bits of the Direct Control Bus
     * - ``bidir[14]``
       - ``IREQn``
