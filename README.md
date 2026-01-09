@@ -10,3 +10,5 @@ Contains:
 - FM Synth
 - Various demos
 - Digital-to-Analog converters
+
+[Full documentation](https://avalonsemiconductors.github.io/WS2025/index.html)
